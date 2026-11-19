@@ -20,4 +20,5 @@ class Project(Base):
     manga_stories = relationship("MangaStory", back_populates="project", cascade="all, delete-orphan")
     images = relationship("GeneratedImage", back_populates="project", cascade="all, delete-orphan")
     videos = relationship("GeneratedVideo", back_populates="project", cascade="all, delete-orphan")
+    conversations = relationship("Conversation", back_populates="project", cascade="all, delete-orphan")
 

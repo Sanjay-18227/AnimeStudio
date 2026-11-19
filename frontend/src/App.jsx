@@ -152,7 +152,11 @@ export default function App() {
           )}
 
           {activeView === 'chat' && (
-            <ChatStudio activeProject={activeProject} language={language} />
+            <ChatStudio
+              activeProject={activeProject}
+              language={language}
+              onOpenSettings={() => setIsSettingsModalOpen(true)}
+            />
           )}
 
           {activeView === 'manga' && (

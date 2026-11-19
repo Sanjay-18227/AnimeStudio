@@ -4,6 +4,7 @@
 
 const API_BASE = '/api';
 
+// Health & System
 export async function fetchHealth() {
   try {
     const res = await fetch(`${API_BASE}/health`);
@@ -15,6 +16,7 @@ export async function fetchHealth() {
   }
 }
 
+// Project Management
 export async function getProjects() {
   try {
     const res = await fetch(`${API_BASE}/projects`);
@@ -80,3 +82,108 @@ export async function deleteProject(projectId) {
   }
 }
 
+// ========================================================
+// AI Providers & Diagnostics (Phase 2)
+// ========================================================
+
+export async function getAIProviders() {
+  try {
+    const res = await fetch(`${API_BASE}/ai/providers`);
+    if (!res.ok) throw new Error(`Failed to fetch providers: ${res.statusText}`);
+    return await res.json();
+  } catch (error) {
+    console.error('API Error (getAIProviders):', error);
+    throw error;
+  }
+}
+
+export async function getAIStatus() {
+  try {
+    const res = await fetch(`${API_BASE}/ai/status`);
+    if (!res.ok) throw new Error(`Failed to fetch AI status: ${res.statusText}`);
+    return await res.json();
+  } catch (error) {
+    console.error('API Error (getAIStatus):', error);
+    return null;
+  }
+}
+
+export async function testAIProvider(providerName, model = null) {
+  try {
+    const res = await fetch(`${API_BASE}/ai/test`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ provider_name: providerName, model }),
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.detail || `Provider test failed with status ${res.status}`);
+    }
+    return await res.json();
+  } catch (error) {
+    console.error('API Error (testAIProvider):', error);
+    throw error;
+  }
+}
+
+// ========================================================
+// AI Chat Studio & Multi-turn Conversations (Phase 2)
+// ========================================================
+
+export async function sendChatMessage(messageData) {
+  try {
+    const res = await fetch(`${API_BASE}/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(messageData),
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.detail || `Chat request failed: ${res.statusText}`);
+    }
+    return await res.json();
+  } catch (error) {
+    console.error('API Error (sendChatMessage):', error);
+    throw error;
+  }
+}
+
+export async function getConversations(projectId = null, mode = null) {
+  try {
+    const params = new URLSearchParams();
+    if (projectId) params.append('project_id', projectId);
+    if (mode) params.append('mode', mode);
+
+    const url = `${API_BASE}/chat/conversations${params.toString() ? `?${params.toString()}` : ''}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Failed to fetch conversations: ${res.statusText}`);
+    return await res.json();
+  } catch (error) {
+    console.error('API Error (getConversations):', error);
+    throw error;
+  }
+}
+
+export async function getConversation(conversationId) {
+  try {
+    const res = await fetch(`${API_BASE}/chat/conversations/${conversationId}`);
+    if (!res.ok) throw new Error(`Failed to get conversation: ${res.statusText}`);
+    return await res.json();
+  } catch (error) {
+    console.error('API Error (getConversation):', error);
+    throw error;
+  }
+}
+
+export async function deleteConversation(conversationId) {
+  try {
+    const res = await fetch(`${API_BASE}/chat/conversations/${conversationId}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok && res.status !== 204) throw new Error(`Failed to delete conversation: ${res.statusText}`);
+    return true;
+  } catch (error) {
+    console.error('API Error (deleteConversation):', error);
+    throw error;
+  }
+}

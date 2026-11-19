@@ -7,6 +7,8 @@ from app.config import settings
 from app.core.database import init_db
 from app.routers.health import router as health_router
 from app.routers.projects import router as projects_router
+from app.routers.ai import router as ai_router
+from app.routers.chat import router as chat_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -37,6 +39,8 @@ app.mount("/storage", StaticFiles(directory=str(settings.STORAGE_DIR)), name="st
 # Include Routers
 app.include_router(health_router, prefix="/api")
 app.include_router(projects_router, prefix="/api")
+app.include_router(ai_router, prefix="/api")
+app.include_router(chat_router, prefix="/api")
 
 @app.get("/")
 def root():

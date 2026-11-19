@@ -1,6 +1,44 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Any, List, Optional
 
+# ========================================================
+# Custom Exceptions for AI Providers
+# ========================================================
+
+class AIProviderError(Exception):
+    """Base exception for all AI provider failures."""
+    def __init__(self, message: str, provider: str, status_code: Optional[int] = None, retryable: bool = False):
+        super().__init__(message)
+        self.message = message
+        self.provider = provider
+        self.status_code = status_code
+        self.retryable = retryable
+
+class AIProviderAuthenticationError(AIProviderError):
+    """Raised when API credentials are missing or rejected (401/403). Not silently retryable."""
+    def __init__(self, message: str, provider: str, status_code: Optional[int] = 401):
+        super().__init__(message, provider, status_code=status_code, retryable=False)
+
+class AIProviderRateLimitError(AIProviderError):
+    """Raised when rate limits or quotas are exceeded (429). Recoverable via fallback."""
+    def __init__(self, message: str, provider: str, status_code: Optional[int] = 429):
+        super().__init__(message, provider, status_code=status_code, retryable=True)
+
+class AIProviderTimeoutError(AIProviderError):
+    """Raised when request times out. Recoverable via fallback."""
+    def __init__(self, message: str, provider: str):
+        super().__init__(message, provider, status_code=408, retryable=True)
+
+class AIProviderServiceError(AIProviderError):
+    """Raised when the remote AI provider server fails (5xx). Recoverable via fallback."""
+    def __init__(self, message: str, provider: str, status_code: Optional[int] = 500):
+        super().__init__(message, provider, status_code=status_code, retryable=True)
+
+
+# ========================================================
+# Abstract Provider Interfaces
+# ========================================================
+
 class TextProvider(ABC):
     """Abstract base class for all Text & Story AI generation providers."""
 
@@ -11,7 +49,7 @@ class TextProvider(ABC):
         pass
 
     @abstractmethod
-    async def generate_text(
+    def generate_text(
         self,
         prompt: str,
         system_instruction: Optional[str] = None,
@@ -23,13 +61,20 @@ class TextProvider(ABC):
         pass
 
     @abstractmethod
-    async def chat(
+    def chat(
         self,
         messages: List[Dict[str, str]],
         system_instruction: Optional[str] = None,
-        model: Optional[str] = None
+        model: Optional[str] = None,
+        temperature: float = 0.7,
+        max_tokens: int = 2048
     ) -> str:
         """Multi-turn chat completion."""
+        pass
+
+    @abstractmethod
+    def test_connection(self, model: Optional[str] = None) -> Dict[str, Any]:
+        """Test API credentials and connectivity."""
         pass
 
 
@@ -43,7 +88,7 @@ class ImageProvider(ABC):
         pass
 
     @abstractmethod
-    async def text_to_image(
+    def text_to_image(
         self,
         prompt: str,
         negative_prompt: Optional[str] = None,
@@ -56,7 +101,7 @@ class ImageProvider(ABC):
         pass
 
     @abstractmethod
-    async def image_to_image(
+    def image_to_image(
         self,
         image_bytes: bytes,
         prompt: str,
@@ -77,7 +122,7 @@ class SpeechProvider(ABC):
         pass
 
     @abstractmethod
-    async def text_to_speech(
+    def text_to_speech(
         self,
         text: str,
         voice: Optional[str] = None,
@@ -97,7 +142,7 @@ class VideoProvider(ABC):
         pass
 
     @abstractmethod
-    async def render_storyboard_video(
+    def render_storyboard_video(
         self,
         scene_images: List[str],
         audio_path: Optional[str] = None,
@@ -106,4 +151,3 @@ class VideoProvider(ABC):
     ) -> str:
         """Compose scenes into an MP4 video."""
         pass
-
