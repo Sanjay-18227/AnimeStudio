@@ -32,3 +32,4 @@ class ChatMessage(Base):
 
     # Relationships
     conversation = relationship("Conversation", back_populates="messages")
+

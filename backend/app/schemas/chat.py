@@ -58,3 +58,4 @@ class AIStatusResponse(BaseModel):
     is_healthy: bool
     configured_providers: List[str]
     fallback_available: bool
+

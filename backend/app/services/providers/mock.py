@@ -178,3 +178,4 @@ class MockTextProvider(TextProvider):
             "latency_ms": 2,
             "message": "Anime Studio AI Local Offline Engine is operational and ready."
         }
+

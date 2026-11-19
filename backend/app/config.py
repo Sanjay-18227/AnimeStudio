@@ -22,7 +22,7 @@ class Settings(BaseSettings):
 
     # Text AI Providers (Free-first)
     GEMINI_API_KEY: str = ""
-    DEFAULT_GEMINI_MODEL: str = "gemini-1.5-flash"
+    DEFAULT_GEMINI_MODEL: str = "gemini-3.5-flash-lite"
     OPENROUTER_API_KEY: str = ""
     DEFAULT_OPENROUTER_MODEL: str = "meta-llama/llama-3.3-70b-instruct:free"
     ACTIVE_TEXT_PROVIDER: str = "gemini"

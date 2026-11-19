@@ -72,3 +72,4 @@ def build_system_instruction(mode: str = "general", language: str = "en") -> str
     mode_text = MODE_INSTRUCTIONS.get(mode, MODE_INSTRUCTIONS["general"])
     lang_text = TAMIL_LANGUAGE_DIRECTIVE if language == "ta" else ENGLISH_LANGUAGE_DIRECTIVE
     return f"{BASE_PERSONA}\n\n{mode_text}{lang_text}"
+

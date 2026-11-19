@@ -39,3 +39,4 @@ def test_provider_connection(payload: ProviderTestRequest):
         message=result.get("message", ""),
         retryable=result.get("retryable", False)
     )
+

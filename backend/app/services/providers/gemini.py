@@ -162,3 +162,4 @@ class GeminiTextProvider(TextProvider):
                 "message": str(ex),
                 "retryable": False
             }
+

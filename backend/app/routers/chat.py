@@ -229,3 +229,4 @@ def delete_conversation(conversation_id: str, db: Session = Depends(get_db)):
     db.delete(conv)
     db.commit()
     return None
+

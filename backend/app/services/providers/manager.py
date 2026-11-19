@@ -57,7 +57,7 @@ class AIProviderManager:
                     "is_configured": self.gemini_provider.is_configured,
                     "masked_key": mask_credential(settings.GEMINI_API_KEY),
                     "default_model": settings.DEFAULT_GEMINI_MODEL,
-                    "available_models": ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"],
+                    "available_models": ["gemini-3.5-flash-lite", "gemini-3.8-flash", "gemini-flash-lite-latest", "gemini-flash-latest"],
                     "is_free_tier": True,
                     "free_tier_limits": "15 RPM / 1M TPM (Free Tier AI Studio)",
                     "documentation_url": "https://aistudio.google.com/"
@@ -199,3 +199,4 @@ class AIProviderManager:
 
 # Global singleton
 ai_manager = AIProviderManager()
+
