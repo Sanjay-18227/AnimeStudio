@@ -222,6 +222,7 @@ export default function App() {
         }}
         systemHealth={systemHealth}
         language={language}
+        activeProject={activeProject}
       />
     </div>
   );

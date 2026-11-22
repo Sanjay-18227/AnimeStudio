@@ -9,6 +9,17 @@ from app.schemas.chat import (
     ProviderTestResponse,
     AIStatusResponse
 )
+from app.schemas.settings import (
+    UserSettingsBase,
+    UserSettingsUpdate,
+    UserSettingsResponse
+)
+from app.schemas.memory import (
+    ProjectMemoryBase,
+    ProjectMemoryCreate,
+    ProjectMemoryUpdate,
+    ProjectMemoryResponse
+)
 
 __all__ = [
     "SystemHealthResponse",
@@ -22,5 +33,12 @@ __all__ = [
     "ConversationDetailResponse",
     "ProviderTestRequest",
     "ProviderTestResponse",
-    "AIStatusResponse"
+    "AIStatusResponse",
+    "UserSettingsBase",
+    "UserSettingsUpdate",
+    "UserSettingsResponse",
+    "ProjectMemoryBase",
+    "ProjectMemoryCreate",
+    "ProjectMemoryUpdate",
+    "ProjectMemoryResponse"
 ]

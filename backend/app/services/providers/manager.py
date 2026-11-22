@@ -25,6 +25,13 @@ def mask_credential(key: str) -> str:
         return "****"
     return f"{cleaned[:6]}...{cleaned[-4:]}"
 
+def trim_message_history(messages: List[Dict[str, str]], max_messages: int = 14) -> List[Dict[str, str]]:
+    """Keeps the most recent messages to protect context window limits while preserving conversational flow."""
+    if len(messages) <= max_messages:
+        return messages
+    # Keep last max_messages
+    return messages[-max_messages:]
+
 class AIProviderManager:
     """Central provider manager coordinating AI execution, validation, testing, and intelligent fallback."""
 
@@ -57,7 +64,7 @@ class AIProviderManager:
                     "is_configured": self.gemini_provider.is_configured,
                     "masked_key": mask_credential(settings.GEMINI_API_KEY),
                     "default_model": settings.DEFAULT_GEMINI_MODEL,
-                    "available_models": ["gemini-3.5-flash-lite", "gemini-3.8-flash", "gemini-flash-lite-latest", "gemini-flash-latest"],
+                    "available_models": ["gemini-3.5-flash-lite", "gemini-1.5-flash", "gemini-3.8-flash", "gemini-flash-lite-latest", "gemini-flash-latest"],
                     "is_free_tier": True,
                     "free_tier_limits": "15 RPM / 1M TPM (Free Tier AI Studio)",
                     "documentation_url": "https://aistudio.google.com/"
@@ -105,15 +112,41 @@ class AIProviderManager:
         language: str = "en",
         preferred_provider: Optional[str] = None,
         preferred_model: Optional[str] = None,
-        temperature: float = 0.7,
-        max_tokens: int = 2048
+        assistant_name: str = "Anime Studio AI",
+        personality: str = "friendly",
+        response_length: str = "balanced",
+        response_tone: str = "encouraging",
+        creativity_level: str = "balanced",
+        project_context: Optional[Dict[str, Any]] = None,
+        memories: Optional[List[Dict[str, str]]] = None
     ) -> Tuple[str, str, str, bool]:
-        """Executes multi-turn chat with mode-aware system instructions and automatic fallback.
+        """Executes multi-turn chat with personalized system instructions, memory continuity, and automatic fallback.
         
         Returns:
             Tuple[content: str, provider_used: str, model_used: str, fallback_triggered: bool]
         """
-        system_instruction = build_system_instruction(mode=mode, language=language)
+        # Determine temperature from creativity level
+        temp_map = {"low": 0.3, "balanced": 0.7, "high": 1.0}
+        temperature = temp_map.get(creativity_level.lower(), 0.7)
+
+        # Determine max tokens from response length
+        length_map = {"short": 512, "balanced": 1500, "detailed": 3000}
+        max_tokens = length_map.get(response_length.lower(), 1500)
+
+        # Build personalized system instruction
+        system_instruction = build_system_instruction(
+            mode=mode,
+            language=language,
+            assistant_name=assistant_name,
+            personality=personality,
+            response_length=response_length,
+            response_tone=response_tone,
+            project_context=project_context,
+            memories=memories
+        )
+
+        # Apply token-aware message history sliding window
+        windowed_messages = trim_message_history(messages, max_messages=14)
 
         # 1. Determine primary provider
         primary_name = (preferred_provider or settings.ACTIVE_TEXT_PROVIDER).lower().strip()
@@ -124,38 +157,38 @@ class AIProviderManager:
             if self.openrouter_provider.is_configured:
                 logger.info("Gemini key not configured; routing to configured OpenRouter provider.")
                 out = self.openrouter_provider.chat(
-                    messages, system_instruction=system_instruction,
+                    windowed_messages, system_instruction=system_instruction,
                     model=preferred_model or self.openrouter_provider.default_model,
                     temperature=temperature, max_tokens=max_tokens
                 )
                 return out, "openrouter", preferred_model or self.openrouter_provider.default_model, True
             else:
                 logger.info("No cloud API keys configured; utilizing Anime Studio local offline engine.")
-                out = self.mock_provider.chat(messages, system_instruction=system_instruction)
+                out = self.mock_provider.chat(windowed_messages, system_instruction=system_instruction)
                 return out, "mock", "offline-engine", False
 
         if primary_name == "openrouter" and not self.openrouter_provider.is_configured:
             if self.gemini_provider.is_configured:
                 logger.info("OpenRouter key not configured; routing to configured Gemini provider.")
                 out = self.gemini_provider.chat(
-                    messages, system_instruction=system_instruction,
+                    windowed_messages, system_instruction=system_instruction,
                     model=preferred_model or self.gemini_provider.default_model,
                     temperature=temperature, max_tokens=max_tokens
                 )
                 return out, "gemini", preferred_model or self.gemini_provider.default_model, True
             else:
-                out = self.mock_provider.chat(messages, system_instruction=system_instruction)
+                out = self.mock_provider.chat(windowed_messages, system_instruction=system_instruction)
                 return out, "mock", "offline-engine", False
 
         if primary_name == "mock":
-            out = self.mock_provider.chat(messages, system_instruction=system_instruction)
+            out = self.mock_provider.chat(windowed_messages, system_instruction=system_instruction)
             return out, "mock", "offline-engine", False
 
         # 2. Try primary provider execution
         try:
             logger.info("Calling primary AI provider: %s", primary_name)
             out = primary_provider.chat(
-                messages,
+                windowed_messages,
                 system_instruction=system_instruction,
                 model=preferred_model,
                 temperature=temperature,
@@ -181,7 +214,7 @@ class AIProviderManager:
                     logger.info("Falling back to OpenRouter free models...")
                     fallback_model = self.openrouter_provider.default_model
                     out = self.openrouter_provider.chat(
-                        messages,
+                        windowed_messages,
                         system_instruction=system_instruction,
                         model=fallback_model,
                         temperature=temperature,
@@ -193,10 +226,9 @@ class AIProviderManager:
 
             # If all else fails and it was a recoverable error, use local mock with a notice
             logger.info("Using local mock provider as final safety net.")
-            mock_out = self.mock_provider.chat(messages, system_instruction=system_instruction)
+            mock_out = self.mock_provider.chat(windowed_messages, system_instruction=system_instruction)
             notice = f"\n\n*(Notice: Primary provider '{primary_name}' failed ({recov_err.message}). Delivered via local backup engine.)*"
             return mock_out + notice, "mock", "offline-engine", True
 
 # Global singleton
 ai_manager = AIProviderManager()
-

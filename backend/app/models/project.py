@@ -21,4 +21,5 @@ class Project(Base):
     images = relationship("GeneratedImage", back_populates="project", cascade="all, delete-orphan")
     videos = relationship("GeneratedVideo", back_populates="project", cascade="all, delete-orphan")
     conversations = relationship("Conversation", back_populates="project", cascade="all, delete-orphan")
+    memories = relationship("ProjectMemory", back_populates="project", cascade="all, delete-orphan")
 

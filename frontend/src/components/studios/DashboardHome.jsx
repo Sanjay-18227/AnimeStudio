@@ -231,7 +231,7 @@ export default function DashboardHome({
           {[
             {
               name: 'Google Gemini',
-              model: 'Gemini 1.5 Flash',
+              model: 'Gemini 3.5 Flash Lite',
               type: 'Free Tier',
               status: systemHealth?.providers?.gemini?.is_configured ? 'Configured' : 'Ready (Free Key)',
               active: systemHealth?.providers?.gemini?.is_configured,

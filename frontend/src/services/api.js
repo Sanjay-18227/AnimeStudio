@@ -83,7 +83,7 @@ export async function deleteProject(projectId) {
 }
 
 // ========================================================
-// AI Providers & Diagnostics (Phase 2)
+// AI Providers & Diagnostics
 // ========================================================
 
 export async function getAIProviders() {
@@ -127,7 +127,7 @@ export async function testAIProvider(providerName, model = null) {
 }
 
 // ========================================================
-// AI Chat Studio & Multi-turn Conversations (Phase 2)
+// AI Chat Studio & Conversations
 // ========================================================
 
 export async function sendChatMessage(messageData) {
@@ -148,11 +148,28 @@ export async function sendChatMessage(messageData) {
   }
 }
 
-export async function getConversations(projectId = null, mode = null) {
+export async function regenerateChatMessage(conversationId) {
+  try {
+    const res = await fetch(`${API_BASE}/chat/conversations/${conversationId}/regenerate`, {
+      method: 'POST',
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.detail || `Failed to regenerate response: ${res.statusText}`);
+    }
+    return await res.json();
+  } catch (error) {
+    console.error('API Error (regenerateChatMessage):', error);
+    throw error;
+  }
+}
+
+export async function getConversations(projectId = null, mode = null, search = null) {
   try {
     const params = new URLSearchParams();
     if (projectId) params.append('project_id', projectId);
     if (mode) params.append('mode', mode);
+    if (search && search.trim()) params.append('search', search.trim());
 
     const url = `${API_BASE}/chat/conversations${params.toString() ? `?${params.toString()}` : ''}`;
     const res = await fetch(url);
@@ -184,6 +201,120 @@ export async function deleteConversation(conversationId) {
     return true;
   } catch (error) {
     console.error('API Error (deleteConversation):', error);
+    throw error;
+  }
+}
+
+// ========================================================
+// User Settings & Personalization
+// ========================================================
+
+export async function getUserSettings() {
+  try {
+    const res = await fetch(`${API_BASE}/settings`);
+    if (!res.ok) throw new Error(`Failed to fetch settings: ${res.statusText}`);
+    return await res.json();
+  } catch (error) {
+    console.error('API Error (getUserSettings):', error);
+    return null;
+  }
+}
+
+export async function updateUserSettings(settingsData) {
+  try {
+    const res = await fetch(`${API_BASE}/settings`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(settingsData),
+    });
+    if (!res.ok) throw new Error(`Failed to update settings: ${res.statusText}`);
+    return await res.json();
+  } catch (error) {
+    console.error('API Error (updateUserSettings):', error);
+    throw error;
+  }
+}
+
+export async function resetUserSettings() {
+  try {
+    const res = await fetch(`${API_BASE}/settings/reset`, {
+      method: 'POST',
+    });
+    if (!res.ok) throw new Error(`Failed to reset settings: ${res.statusText}`);
+    return await res.json();
+  } catch (error) {
+    console.error('API Error (resetUserSettings):', error);
+    throw error;
+  }
+}
+
+// ========================================================
+// Project Memories & Lore Rules
+// ========================================================
+
+export async function getProjectMemories(projectId) {
+  try {
+    const res = await fetch(`${API_BASE}/projects/${projectId}/memories`);
+    if (!res.ok) throw new Error(`Failed to fetch project memories: ${res.statusText}`);
+    return await res.json();
+  } catch (error) {
+    console.error('API Error (getProjectMemories):', error);
+    return [];
+  }
+}
+
+export async function createProjectMemory(projectId, memoryData) {
+  try {
+    const res = await fetch(`${API_BASE}/projects/${projectId}/memories`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(memoryData),
+    });
+    if (!res.ok) throw new Error(`Failed to create memory: ${res.statusText}`);
+    return await res.json();
+  } catch (error) {
+    console.error('API Error (createProjectMemory):', error);
+    throw error;
+  }
+}
+
+export async function updateProjectMemory(projectId, memoryId, memoryData) {
+  try {
+    const res = await fetch(`${API_BASE}/projects/${projectId}/memories/${memoryId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(memoryData),
+    });
+    if (!res.ok) throw new Error(`Failed to update memory: ${res.statusText}`);
+    return await res.json();
+  } catch (error) {
+    console.error('API Error (updateProjectMemory):', error);
+    throw error;
+  }
+}
+
+export async function deleteProjectMemory(projectId, memoryId) {
+  try {
+    const res = await fetch(`${API_BASE}/projects/${projectId}/memories/${memoryId}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok && res.status !== 204) throw new Error(`Failed to delete memory: ${res.statusText}`);
+    return true;
+  } catch (error) {
+    console.error('API Error (deleteProjectMemory):', error);
+    throw error;
+  }
+}
+
+export async function clearProjectMemories(projectId) {
+  try {
+    const res = await fetch(`${API_BASE}/projects/${projectId}/memories`, {
+      method: 'DELETE',
+    });
+    if (!res.ok && res.status !== 204) throw new Error(`Failed to clear memories: ${res.statusText}`);
+    return true;
+  } catch (error) {
+    console.error('API Error (clearProjectMemories):', error);
     throw error;
   }
 }
