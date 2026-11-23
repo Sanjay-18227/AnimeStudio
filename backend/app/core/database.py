@@ -29,7 +29,8 @@ def get_db():
         db.close()
 
 def init_db():
-    """Initialize database tables."""
+    """Initialize database tables and run lightweight migrations."""
     # Ensure models are imported before creating tables
     import app.models  # noqa: F401
     Base.metadata.create_all(bind=engine)
+    app.models.migrate_manga_tables(engine)

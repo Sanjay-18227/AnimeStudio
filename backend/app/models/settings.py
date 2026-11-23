@@ -20,3 +20,4 @@ class UserSettings(Base):
     auto_speak_responses: Mapped[bool] = mapped_column(Boolean, default=False)
     voice_speed: Mapped[float] = mapped_column(Float, default=1.0)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+

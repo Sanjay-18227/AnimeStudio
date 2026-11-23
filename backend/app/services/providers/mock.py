@@ -41,6 +41,168 @@ class MockTextProvider(TextProvider):
         is_tamil = ("தமிழ்" in (system_instruction or "") or any('\u0b80' <= c <= '\u0bff' for c in user_message))
         lower_prompt = user_message.lower()
 
+        # JSON Schema detection
+        is_json = "json" in (system_instruction or "").lower() or "schema" in lower_prompt or "json" in lower_prompt
+        if is_json:
+            import json
+            # Single Chapter Script JSON
+            if "chapterschema" in lower_prompt or ("chapter" in lower_prompt and "manga story" not in lower_prompt and "story title" not in lower_prompt):
+                chapter_json = {
+                    "chapter_number": 1,
+                    "title": "Awakening in the Neon Rain" if not is_tamil else "மழை இரவில் விழிப்புணர்வு",
+                    "summary": "The protagonist unlocks the sealed spirit weapon and confronts the pursuing enforcers.",
+                    "cliffhanger": "A cloaked figure steps into the neon glare bearing the crest of the fallen clan!",
+                    "scenes": [
+                        {
+                            "scene_number": 1,
+                            "title": "The Sector 4 Alleyway",
+                            "location": "Neo-Tokyo Alley",
+                            "time_of_day": "Midnight",
+                            "description": "Rain pours over buzzing holographic billboards.",
+                            "mood": "Tense",
+                            "visual_prompt": "cyberpunk alley, rain, neon reflections, 8k",
+                            "panels": [
+                                {
+                                    "panel_number": 1,
+                                    "shot_type": "Wide Shot",
+                                    "camera_angle": "High Angle",
+                                    "visual_description": "Top-down view of narrow alley drenched in violet rain.",
+                                    "dialogues": [{"character": "Ren", "text": "Just three more blocks...", "emotion": "Determined", "dialogue_type": "thought"}],
+                                    "sound_effects": [{"text": "ザザザ (Zazaza)", "meaning": "Rushing rain", "visual_style": "ambient"}],
+                                    "narration": "Sector 4 was quiet.",
+                                    "emotion": "Tense",
+                                    "visual_prompt": "cyberpunk alley, rain, 8k"
+                                }
+                            ]
+                        }
+                    ]
+                }
+                return json.dumps(chapter_json, ensure_ascii=False)
+
+            # Full Story Script JSON
+            story_title = "Kusanagi: The Void Resonance" if not is_tamil else "விதியின் வாள்: நிழல்களின் எழுச்சி"
+            story_json = {
+                "title": story_title,
+                "genre": ["Action", "Sci-fi"],
+                "subgenre": "Cyberpunk Shonen",
+                "premise": "A rogue courier discovers an ancient dragon katana that synchronizes only with his neural implants.",
+                "synopsis": "In the rain-slicked sprawl of Neo-Edo year 2188, ancient spirit katanas awaken. Ren Kageyama synchronizes with the sealed Void Blade.",
+                "world_building": "Spiritual energy manifests through compatible neural implants. Spirit blades consume stamina in exchange for spatial distortion.",
+                "setting": "Neo-Edo Cyber Sprawl",
+                "time_period": "Year 2188",
+                "art_direction": "High-contrast shonen action with Makoto Shinkai volumetric lighting and heavy ink splash panels",
+                "target_audience": "Shonen",
+                "language": "ta" if is_tamil else "en",
+                "tone": "Dramatic",
+                "ending_type": "Epic",
+                "main_conflict": "Ren's struggle to master the Void Blade before the Syndicate harvests its core.",
+                "story_arcs": "Arc 1: The Blade Awakens; Arc 2: Sector 7 Ambush; Arc 3: The Eclipse Convergence",
+                "characters": [
+                    {
+                        "name": "Ren Kageyama",
+                        "role": "Protagonist",
+                        "age": "19",
+                        "appearance": "Lean athletic build, sharp determined jawline, cybernetic scar across left brow",
+                        "hair": "Spiky midnight violet hair with silver bangs",
+                        "eye_color": "Luminescent electric cyan",
+                        "clothing": "Weathered matte black high-collar duster coat with glowing violet circuit lining",
+                        "body_type": "Athletic",
+                        "personality": "Stoic, fiercely loyal, hyper-observant under pressure",
+                        "abilities": "Void Step (micro-teleportation within 5 meters), Blade Synchronization",
+                        "relationships": "Rivalry with Kenjiro Takahashi",
+                        "visual_prompt": "1boy, ren kageyama, spiky violet hair, cyan glowing eyes, black trench coat, holding glowing katana, anime masterpiece, 8k"
+                    },
+                    {
+                        "name": "Kenjiro Takahashi",
+                        "role": "Rival",
+                        "age": "21",
+                        "appearance": "Tall, disciplined posture, crimson titanium cybernetic right arm",
+                        "hair": "Sleek jet-black hair tied in high samurai ponytail",
+                        "eye_color": "Steel grey with red targeting optics",
+                        "clothing": "White and carbon-fiber tactical haori jacket, gold-accented scabbard",
+                        "body_type": "Muscular",
+                        "personality": "Strict, honor-bound, uncompromising perfectionist",
+                        "abilities": "Overclocked Reflexes, Crimson Flash Strike",
+                        "relationships": "Tasked with retrieving the Void Blade from Ren",
+                        "visual_prompt": "1boy, kenjiro, black ponytail, crimson cyber arm, tactical samurai jacket, katana, 8k"
+                    }
+                ],
+                "chapters": [
+                    {
+                        "chapter_number": 1,
+                        "title": "Awakening in the Neon Rain" if not is_tamil else "மழை இரவில் விழிப்புணர்வு",
+                        "summary": "Ren flees with the locked box through Sector 4 and unseals the Void Katana during an ambush.",
+                        "cliffhanger": "The blade ignites with violet cosmic energy as the shadow syndicate surrounds him!",
+                        "scenes": [
+                            {
+                                "scene_number": 1,
+                                "title": "The Narrow Alley in Sector 4",
+                                "location": "Neo-Tokyo Sector 4 Alley",
+                                "time_of_day": "Midnight",
+                                "description": "Rain pours over buzzing holographic billboards. Steam rises from sewer grates.",
+                                "mood": "Tense",
+                                "visual_prompt": "cyberpunk alleyway, neon lights, rain, high detail",
+                                "panels": [
+                                    {
+                                        "panel_number": 1,
+                                        "shot_type": "Wide Shot",
+                                        "camera_angle": "High Angle",
+                                        "visual_description": "Top-down view of narrow alley drenched in violet rain. A lone cloaked figure runs between puddles, clutching a cloth-wrapped longbox.",
+                                        "dialogues": [{"character": "Ren", "text": "Just three more blocks...", "emotion": "Determined", "dialogue_type": "thought"}],
+                                        "sound_effects": [{"text": "ザザザ (Zazaza)", "meaning": "Rushing rain", "visual_style": "ambient"}],
+                                        "narration": "Sector 4 was quiet. Too quiet for midnight.",
+                                        "emotion": "Tense",
+                                        "visual_prompt": "cyberpunk alley, heavy rain, neon reflections, top-down wide shot, anime screentone, 8k"
+                                    },
+                                    {
+                                        "panel_number": 2,
+                                        "shot_type": "Close-Up",
+                                        "camera_angle": "Low Angle",
+                                        "visual_description": "Ren skids to a halt. His cybernetic optical implant flashes bright crimson with an alert.",
+                                        "dialogues": [{"character": "Ren", "text": "Tch... they're already here!", "emotion": "Shocked", "dialogue_type": "speech"}],
+                                        "sound_effects": [{"text": "ピピッ (Pipi)", "meaning": "Beeping alert", "visual_style": "subtle"}],
+                                        "narration": "",
+                                        "emotion": "Alarmed",
+                                        "visual_prompt": "anime boy face, glowing red ocular cyber implant, shocked expression, rain droplets on skin, 8k"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "chapter_number": 2,
+                        "title": "Clash of Steel and Circuits" if not is_tamil else "இரும்பு மற்றும் மின்சுற்றுகளின் மோதல்",
+                        "summary": "Kenjiro confronts Ren atop the transit line as the Void Blade unleashes spatial shockwaves.",
+                        "cliffhanger": "Ren's eyes burn with violet flames as he parries the lethal strike!",
+                        "scenes": [
+                            {
+                                "scene_number": 1,
+                                "title": "Skyline Monorail Track",
+                                "location": "Sector 4 High Track",
+                                "time_of_day": "Midnight",
+                                "description": "High speed maglev train speeds above neon rain spires.",
+                                "mood": "Epic",
+                                "visual_prompt": "cyberpunk train roof duel, rain, sparks, 8k",
+                                "panels": [
+                                    {
+                                        "panel_number": 1,
+                                        "shot_type": "Splash Page",
+                                        "camera_angle": "Dynamic Dutch Angle",
+                                        "visual_description": "Full splash panel of Ren and Kenjiro clashing swords atop the train.",
+                                        "dialogues": [{"character": "Kenjiro", "text": "Give up the blade, Ren!", "emotion": "Determined", "dialogue_type": "shout"}],
+                                        "sound_effects": [{"text": "バキィィン (Bakiin)", "meaning": "Impact clang", "visual_style": "impact"}],
+                                        "narration": "",
+                                        "emotion": "Climax",
+                                        "visual_prompt": "two anime swordsmen clashing, purple sparks, train roof, 8k"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+            return json.dumps(story_json, ensure_ascii=False)
+
         # Mode detection from system instruction or content
         is_character = "character" in (system_instruction or "").lower() or "character" in lower_prompt
         is_manga = "manga" in (system_instruction or "").lower() or "chapter" in lower_prompt or "scene" in lower_prompt

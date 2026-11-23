@@ -20,6 +20,29 @@ from app.schemas.memory import (
     ProjectMemoryUpdate,
     ProjectMemoryResponse
 )
+from app.schemas.manga import (
+    DialogueItem,
+    SoundEffectItem,
+    PanelScript,
+    SceneScript,
+    ChapterScript,
+    CharacterScript,
+    MangaStoryScript,
+    MangaStoryGenerateRequest,
+    MangaChapterGenerateRequest,
+    MangaSceneGenerateRequest,
+    MangaPanelGenerateRequest,
+    MangaAITransformRequest,
+    MangaStoryUpdate,
+    MangaChapterUpdate,
+    MangaSceneUpdate,
+    MangaPanelUpdate,
+    StoryCharacterResponse,
+    MangaPanelResponse,
+    MangaSceneResponse,
+    MangaChapterResponse,
+    MangaStoryResponse
+)
 
 __all__ = [
     "SystemHealthResponse",
@@ -40,5 +63,26 @@ __all__ = [
     "ProjectMemoryBase",
     "ProjectMemoryCreate",
     "ProjectMemoryUpdate",
-    "ProjectMemoryResponse"
+    "ProjectMemoryResponse",
+    "DialogueItem",
+    "SoundEffectItem",
+    "PanelScript",
+    "SceneScript",
+    "ChapterScript",
+    "CharacterScript",
+    "MangaStoryScript",
+    "MangaStoryGenerateRequest",
+    "MangaChapterGenerateRequest",
+    "MangaSceneGenerateRequest",
+    "MangaPanelGenerateRequest",
+    "MangaAITransformRequest",
+    "MangaStoryUpdate",
+    "MangaChapterUpdate",
+    "MangaSceneUpdate",
+    "MangaPanelUpdate",
+    "StoryCharacterResponse",
+    "MangaPanelResponse",
+    "MangaSceneResponse",
+    "MangaChapterResponse",
+    "MangaStoryResponse"
 ]

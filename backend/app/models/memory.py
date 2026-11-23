@@ -16,3 +16,4 @@ class ProjectMemory(Base):
 
     # Relationships
     project = relationship("Project", back_populates="memories")
+

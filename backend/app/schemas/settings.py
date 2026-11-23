@@ -36,3 +36,4 @@ class UserSettingsResponse(UserSettingsBase):
 
     class Config:
         from_attributes = True
+

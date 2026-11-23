@@ -63,3 +63,4 @@ voice_registry = {
     "whisper": WhisperCppAdapter(),
     "piper": PiperTTSAdapter()
 }
+

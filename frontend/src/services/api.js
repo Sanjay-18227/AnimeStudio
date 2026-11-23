@@ -318,3 +318,233 @@ export async function clearProjectMemories(projectId) {
     throw error;
   }
 }
+
+// ========================================================
+// Manga Studio & Script Generation (Phase 3)
+// ========================================================
+
+export async function generateMangaStory(storyData) {
+  try {
+    const res = await fetch(`${API_BASE}/manga/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(storyData),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || `Failed to generate manga story: ${res.statusText}`);
+    }
+    return await res.json();
+  } catch (error) {
+    console.error('API Error (generateMangaStory):', error);
+    throw error;
+  }
+}
+
+export async function getProjectMangaStories(projectId) {
+  try {
+    const res = await fetch(`${API_BASE}/manga/projects/${projectId}/stories`);
+    if (!res.ok) throw new Error(`Failed to fetch manga stories: ${res.statusText}`);
+    return await res.json();
+  } catch (error) {
+    console.error('API Error (getProjectMangaStories):', error);
+    return [];
+  }
+}
+
+export async function getMangaStory(storyId) {
+  try {
+    const res = await fetch(`${API_BASE}/manga/stories/${storyId}`);
+    if (!res.ok) throw new Error(`Failed to fetch manga story: ${res.statusText}`);
+    return await res.json();
+  } catch (error) {
+    console.error('API Error (getMangaStory):', error);
+    throw error;
+  }
+}
+
+export async function updateMangaStory(storyId, updateData) {
+  try {
+    const res = await fetch(`${API_BASE}/manga/stories/${storyId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updateData),
+    });
+    if (!res.ok) throw new Error(`Failed to update manga story: ${res.statusText}`);
+    return await res.json();
+  } catch (error) {
+    console.error('API Error (updateMangaStory):', error);
+    throw error;
+  }
+}
+
+export async function deleteMangaStory(storyId) {
+  try {
+    const res = await fetch(`${API_BASE}/manga/stories/${storyId}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok && res.status !== 204) throw new Error(`Failed to delete manga story: ${res.statusText}`);
+    return true;
+  } catch (error) {
+    console.error('API Error (deleteMangaStory):', error);
+    throw error;
+  }
+}
+
+export async function generateMangaChapter(storyId, chapterData) {
+  try {
+    const res = await fetch(`${API_BASE}/manga/stories/${storyId}/chapters`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(chapterData),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || `Failed to generate chapter: ${res.statusText}`);
+    }
+    return await res.json();
+  } catch (error) {
+    console.error('API Error (generateMangaChapter):', error);
+    throw error;
+  }
+}
+
+export async function updateMangaChapter(chapterId, updateData) {
+  try {
+    const res = await fetch(`${API_BASE}/manga/chapters/${chapterId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updateData),
+    });
+    if (!res.ok) throw new Error(`Failed to update chapter: ${res.statusText}`);
+    return await res.json();
+  } catch (error) {
+    console.error('API Error (updateMangaChapter):', error);
+    throw error;
+  }
+}
+
+export async function deleteMangaChapter(chapterId) {
+  try {
+    const res = await fetch(`${API_BASE}/manga/chapters/${chapterId}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok && res.status !== 204) throw new Error(`Failed to delete chapter: ${res.statusText}`);
+    return true;
+  } catch (error) {
+    console.error('API Error (deleteMangaChapter):', error);
+    throw error;
+  }
+}
+
+export async function addMangaScene(chapterId, sceneData) {
+  try {
+    const res = await fetch(`${API_BASE}/manga/chapters/${chapterId}/scenes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(sceneData),
+    });
+    if (!res.ok) throw new Error(`Failed to add scene: ${res.statusText}`);
+    return await res.json();
+  } catch (error) {
+    console.error('API Error (addMangaScene):', error);
+    throw error;
+  }
+}
+
+export async function updateMangaScene(sceneId, updateData) {
+  try {
+    const res = await fetch(`${API_BASE}/manga/scenes/${sceneId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updateData),
+    });
+    if (!res.ok) throw new Error(`Failed to update scene: ${res.statusText}`);
+    return await res.json();
+  } catch (error) {
+    console.error('API Error (updateMangaScene):', error);
+    throw error;
+  }
+}
+
+export async function deleteMangaScene(sceneId) {
+  try {
+    const res = await fetch(`${API_BASE}/manga/scenes/${sceneId}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok && res.status !== 204) throw new Error(`Failed to delete scene: ${res.statusText}`);
+    return true;
+  } catch (error) {
+    console.error('API Error (deleteMangaScene):', error);
+    throw error;
+  }
+}
+
+export async function addMangaPanel(sceneId, panelData) {
+  try {
+    const res = await fetch(`${API_BASE}/manga/scenes/${sceneId}/panels`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(panelData),
+    });
+    if (!res.ok) throw new Error(`Failed to add panel: ${res.statusText}`);
+    return await res.json();
+  } catch (error) {
+    console.error('API Error (addMangaPanel):', error);
+    throw error;
+  }
+}
+
+export async function updateMangaPanel(panelId, updateData) {
+  try {
+    const res = await fetch(`${API_BASE}/manga/panels/${panelId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updateData),
+    });
+    if (!res.ok) throw new Error(`Failed to update panel: ${res.statusText}`);
+    return await res.json();
+  } catch (error) {
+    console.error('API Error (updateMangaPanel):', error);
+    throw error;
+  }
+}
+
+export async function deleteMangaPanel(panelId) {
+  try {
+    const res = await fetch(`${API_BASE}/manga/panels/${panelId}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok && res.status !== 204) throw new Error(`Failed to delete panel: ${res.statusText}`);
+    return true;
+  } catch (error) {
+    console.error('API Error (deleteMangaPanel):', error);
+    throw error;
+  }
+}
+
+export async function transformMangaScript(transformData) {
+  try {
+    const res = await fetch(`${API_BASE}/manga/ai/transform`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(transformData),
+    });
+    if (!res.ok) throw new Error(`Failed to transform manga element: ${res.statusText}`);
+    return await res.json();
+  } catch (error) {
+    console.error('API Error (transformMangaScript):', error);
+    throw error;
+  }
+}
+
+export async function exportMangaStory(storyId, format = 'markdown') {
+  try {
+    const res = await fetch(`${API_BASE}/manga/stories/${storyId}/export/${format}`);
+    if (!res.ok) throw new Error(`Failed to export story: ${res.statusText}`);
+    return await res.text();
+  } catch (error) {
+    console.error('API Error (exportMangaStory):', error);
+    throw error;
+  }
+}

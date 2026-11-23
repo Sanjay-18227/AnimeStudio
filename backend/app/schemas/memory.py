@@ -23,3 +23,4 @@ class ProjectMemoryResponse(ProjectMemoryBase):
 
     class Config:
         from_attributes = True
+

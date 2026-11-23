@@ -11,6 +11,7 @@ from app.routers.ai import router as ai_router
 from app.routers.chat import router as chat_router
 from app.routers.settings import router as settings_router
 from app.routers.memories import router as memories_router
+from app.routers.manga import router as manga_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -45,6 +46,7 @@ app.include_router(ai_router, prefix="/api")
 app.include_router(chat_router, prefix="/api")
 app.include_router(settings_router, prefix="/api")
 app.include_router(memories_router, prefix="/api")
+app.include_router(manga_router, prefix="/api")
 
 @app.get("/")
 def root():

@@ -4,6 +4,7 @@ from app.routers.ai import router as ai_router
 from app.routers.chat import router as chat_router
 from app.routers.settings import router as settings_router
 from app.routers.memories import router as memories_router
+from app.routers.manga import router as manga_router
 
 __all__ = [
     "health_router",
@@ -11,5 +12,6 @@ __all__ = [
     "ai_router",
     "chat_router",
     "settings_router",
-    "memories_router"
+    "memories_router",
+    "manga_router"
 ]

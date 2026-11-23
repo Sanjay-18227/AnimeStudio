@@ -54,3 +54,4 @@ def reset_user_settings(db: Session = Depends(get_db)):
     db.commit()
     db.refresh(settings)
     return settings
+
