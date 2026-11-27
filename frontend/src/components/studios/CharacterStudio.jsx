@@ -232,7 +232,7 @@ export default function CharacterStudio({ activeProject, language = 'en', onNoti
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-studio-border pb-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-studio-border pb-4">
         <div>
           <h1 className="font-display text-2xl font-bold text-white flex items-center gap-2.5">
             <UserSquare2 className="h-6 w-6 text-fuchsia-400" />

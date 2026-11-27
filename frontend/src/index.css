@@ -178,3 +178,16 @@
   background-color: #333333 !important;
 }
 
+@media (max-width: 769px) {
+  button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    min-height: 44px;
+  }
+}
+

@@ -356,7 +356,7 @@ export default function SettingsModal({
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-studio-border bg-studio-elevated/40 px-6 gap-2 shrink-0 overflow-x-auto">
+        <div className="flex flex-col border-b border-studio-border bg-studio-elevated/40 px-4 gap-1 shrink-0 sm:flex-row sm:px-6 sm:gap-2 sm:overflow-x-auto">
           <button
             onClick={() => setActiveTab('providers')}
             className={`flex items-center gap-2 py-3 px-3 text-xs font-semibold border-b-2 transition-colors whitespace-nowrap ${

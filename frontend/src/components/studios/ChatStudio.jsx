@@ -155,11 +155,20 @@ export default function ChatStudio({
   const [loading, setLoading] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
   const [error, setError] = useState(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => window.innerWidth >= 768);
   const [searchQuery, setSearchQuery] = useState('');
   const [copiedIndex, setCopiedIndex] = useState(null);
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [userSettings, setUserSettings] = useState(null);
+
+  useEffect(() => {
+    const collapseSidebarOnNarrowViewport = () => {
+      if (window.innerWidth < 768) setIsSidebarOpen(false);
+    };
+
+    window.addEventListener('resize', collapseSidebarOnNarrowViewport);
+    return () => window.removeEventListener('resize', collapseSidebarOnNarrowViewport);
+  }, []);
   const [isQuickListening, setIsQuickListening] = useState(false);
 
   const messagesEndRef = useRef(null);

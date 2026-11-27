@@ -552,7 +552,7 @@ export default function MangaStudio({ activeProject, language = 'en', onNotify }
 
       {/* Navigation Sub-Tabs & Actions Bar */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-studio-border pb-2">
-        <div className="flex gap-2">
+        <div className="flex min-w-0 flex-wrap gap-2">
           <button
             onClick={() => setActiveTab('editor')}
             className={`flex items-center gap-2 py-2 px-3 text-xs font-semibold border-b-2 transition-colors ${

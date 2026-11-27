@@ -25,9 +25,9 @@ export default function Header({
   isMobileSidebarOpen = false
 }) {
   return (
-    <header className="sticky top-0 z-10 flex min-h-16 w-full flex-wrap items-center justify-between gap-2 border-b border-studio-border bg-black px-3 py-2 backdrop-blur-md sm:flex-nowrap sm:px-6">
+    <header className="sticky top-0 z-10 flex min-h-16 w-full flex-wrap items-center justify-between gap-2 border-b border-studio-border bg-black px-3 py-2 backdrop-blur-md xl:flex-nowrap sm:px-6">
       {/* Left: Active Project Selector */}
-      <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-4">
+      <div className="flex min-w-max flex-1 items-center gap-2 sm:gap-4">
         <button
           type="button"
           onClick={onToggleMobileSidebar}
@@ -47,7 +47,7 @@ export default function Header({
           </span>
         </div>
 
-        <div className="relative min-w-0 flex-1 sm:flex-none">
+        <div className="relative min-w-[7rem] flex-1 sm:flex-none">
           <select
             value={activeProject ? activeProject.id : ''}
             onChange={(e) => {
@@ -79,7 +79,7 @@ export default function Header({
       </div>
 
       {/* Right: Status Pills, Language, Actions */}
-      <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
+      <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-3">
         {/* Free-First AI Model Status Pill */}
         <button
           type="button"

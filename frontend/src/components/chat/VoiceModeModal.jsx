@@ -22,8 +22,12 @@ const VOICE_LANGUAGES = [
   { code: 'ja-JP', label: 'Japanese (日本語)', labelTa: 'ஜப்பானிய மொழி', flag: '🇯🇵', name: 'ja' },
 ];
 
-export default function VoiceModeModal({
-  isOpen,
+export default function VoiceModeModal(props) {
+  if (!props.isOpen) return null;
+  return <VoiceModeModalContent {...props} />;
+}
+
+function VoiceModeModalContent({
   onClose,
   onSendMessage,
   lastAssistantMessage,
@@ -31,7 +35,7 @@ export default function VoiceModeModal({
   assistantName = 'Anime Studio AI',
   voiceSpeed = 1.0
 }) {
-  if (!isOpen) return null;
+
 
   const isTamil = language === 'ta';
 
@@ -249,7 +253,7 @@ export default function VoiceModeModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
-      <div className="relative flex flex-col w-full max-w-xl rounded-3xl border border-studio-purple/40 bg-gradient-to-b from-[#14122E] via-[#0E1022] to-[#0A0C16] p-6 shadow-2xl text-white overflow-hidden">
+      <div className="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-xl flex-col rounded-3xl border border-studio-purple/40 bg-gradient-to-b from-[#14122E] via-[#0E1022] to-[#0A0C16] p-4 shadow-2xl text-white overflow-x-hidden overflow-y-auto sm:p-6">
         {/* Glowing Background Ambiance */}
         <div className="absolute -top-24 -left-24 h-64 w-64 rounded-full bg-studio-purple/20 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -right-24 h-64 w-64 rounded-full bg-studio-cyan/20 blur-3xl pointer-events-none" />
@@ -261,7 +265,7 @@ export default function VoiceModeModal({
               <Radio className="h-5 w-5 text-violet-400 animate-pulse" />
             </div>
             <div>
-              <h3 className="font-display font-bold text-base text-white flex items-center gap-2">
+              <h3 className="font-display font-bold text-base text-white flex flex-wrap items-center gap-2">
                 <span>{assistantName} Voice Mode</span>
                 <span className="rounded-full bg-studio-cyan/20 text-studio-cyan-light text-[10px] font-semibold px-2 py-0.5 border border-studio-cyan/30">
                   Hands-Free
@@ -397,7 +401,7 @@ export default function VoiceModeModal({
         {/* Voice Controls & Language Selector */}
         <div className="relative z-10 mt-4 pt-3 border-t border-studio-border/60 flex flex-wrap items-center justify-between gap-3 text-xs">
           {/* Language Pills */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5">
             {VOICE_LANGUAGES.map((lang) => (
               <button
                 key={lang.code}
