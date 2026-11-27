@@ -8,8 +8,8 @@ import {
   UserSquare2,
   Sparkles,
   Film,
-  Calendar,
-  Check
+  Check,
+  LoaderCircle
 } from 'lucide-react';
 
 export default function ProjectsHub({
@@ -18,6 +18,7 @@ export default function ProjectsHub({
   onSelectProject,
   onOpenNewProjectModal,
   onDeleteProject,
+  onOpenProject,
   setActiveView,
   language = 'en'
 }) {
@@ -53,6 +54,7 @@ export default function ProjectsHub({
         </div>
 
         <button
+          type="button"
           onClick={onOpenNewProjectModal}
           className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-studio-purple to-indigo-600 px-4 py-2.5 text-xs font-semibold text-white shadow-glow-purple hover:opacity-95 transition-all self-start"
         >
@@ -60,6 +62,28 @@ export default function ProjectsHub({
           <span>{isTamil ? 'புதிய திட்டம்' : 'Create New Project'}</span>
         </button>
       </div>
+
+      {activeProject && (
+        <section className="flex flex-col gap-3 rounded-xl border border-studio-purple/30 bg-studio-purple/10 p-4 sm:flex-row sm:items-center sm:justify-between" aria-label="Current project">
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-studio-purple-light">
+              {isTamil ? 'செயலில் உள்ள திட்டம்' : 'Active project'}
+            </p>
+            <h2 className="truncate text-base font-bold text-white">{activeProject.title}</h2>
+            <p className="text-xs text-slate-300">
+              {activeProject.genre || 'Shonen'} · {activeProject.target_audience || 'General'}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => onOpenProject(activeProject)}
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-studio-purple px-3 py-2 text-xs font-semibold text-white hover:bg-studio-purple-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            {isTamil ? 'ஸ்டுடியோ திற' : 'Open active project'}
+            <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+          </button>
+        </section>
+      )}
 
       {/* Projects Grid */}
       {projects.length === 0 ? (
@@ -78,6 +102,7 @@ export default function ProjectsHub({
             </p>
           </div>
           <button
+            type="button"
             onClick={onOpenNewProjectModal}
             className="flex items-center gap-2 rounded-xl bg-studio-purple px-4 py-2 text-xs font-semibold text-white hover:bg-studio-purple-dark transition-colors"
           >
@@ -90,10 +115,9 @@ export default function ProjectsHub({
           {projects.map((proj) => {
             const isActive = activeProject && activeProject.id === proj.id;
             return (
-              <div
+              <article
                 key={proj.id}
-                onClick={() => onSelectProject(proj)}
-                className={`relative flex flex-col justify-between rounded-xl border p-5 transition-all cursor-pointer ${
+                className={`relative flex min-w-0 flex-col justify-between rounded-xl border p-4 transition-all sm:p-5 ${
                   isActive
                     ? 'border-studio-purple bg-gradient-to-b from-studio-card to-[#191D38] shadow-glow-purple'
                     : 'border-studio-border bg-studio-card hover:border-studio-purple/50 hover:bg-studio-elevated'
@@ -117,9 +141,15 @@ export default function ProjectsHub({
                     )}
                   </div>
 
-                  <h3 className="text-base font-bold text-white group-hover:text-studio-purple-light transition-colors line-clamp-1">
+                  <button
+                    type="button"
+                    onClick={() => onSelectProject(proj)}
+                    className="max-w-full truncate text-left text-base font-bold text-white transition-colors hover:text-studio-purple-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-studio-purple"
+                    aria-label={`${isTamil ? 'திட்டத்தைத் தேர்ந்தெடு' : 'Select project'}: ${proj.title}`}
+                    aria-pressed={Boolean(isActive)}
+                  >
                     {proj.title}
-                  </h3>
+                  </button>
 
                   <p className="text-xs text-slate-400 line-clamp-2 mt-1 min-h-[32px]">
                     {proj.description || (isTamil ? 'விளக்கம் இல்லை' : 'No description provided')}
@@ -132,14 +162,14 @@ export default function ProjectsHub({
                         <UserSquare2 className="h-3 w-3" />
                       </div>
                       <div className="text-xs font-bold text-white">{proj.characters_count || 0}</div>
-                      <div className="text-[8px] text-slate-400 uppercase">Chars</div>
+                      <div className="text-[8px] text-slate-400 uppercase">Characters</div>
                     </div>
                     <div className="rounded-lg bg-studio-elevated/70 p-1.5">
                       <div className="flex items-center justify-center text-slate-400 mb-0.5">
                         <BookOpen className="h-3 w-3" />
                       </div>
                       <div className="text-xs font-bold text-white">{proj.chapters_count || 0}</div>
-                      <div className="text-[8px] text-slate-400 uppercase">Chaps</div>
+                      <div className="text-[8px] text-slate-400 uppercase">Chapters</div>
                     </div>
                     <div className="rounded-lg bg-studio-elevated/70 p-1.5">
                       <div className="flex items-center justify-center text-slate-400 mb-0.5">
@@ -161,10 +191,10 @@ export default function ProjectsHub({
                 {/* Card actions */}
                 <div className="flex items-center justify-between border-t border-studio-border/70 pt-3 mt-4 text-xs">
                   <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onSelectProject(proj);
-                      setActiveView('chat');
+                      onOpenProject(proj);
                     }}
                     className="flex items-center gap-1 font-semibold text-studio-purple-light hover:underline"
                   >
@@ -173,15 +203,19 @@ export default function ProjectsHub({
                   </button>
 
                   <button
+                    type="button"
                     disabled={deletingId === proj.id}
                     onClick={(e) => handleDelete(e, proj.id)}
-                    className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-rose-500/20 hover:text-rose-400 transition-colors"
-                    title={isTamil ? 'திட்டத்தை நீக்கு' : 'Delete Project'}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-rose-500/20 hover:text-rose-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-rose-400 disabled:cursor-wait disabled:opacity-60"
+                    aria-label={`${isTamil ? 'திட்டத்தை நீக்கு' : 'Delete project'}: ${proj.title}`}
+                    title={isTamil ? 'திட்டத்தை நீக்கு' : 'Delete project'}
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    {deletingId === proj.id
+                      ? <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden="true" />
+                      : <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />}
                   </button>
                 </div>
-              </div>
+              </article>
             );
           })}
         </div>

@@ -12,7 +12,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ShieldCheck,
-  Flame
+  Flame,
+  X
 } from 'lucide-react';
 
 export default function Sidebar({
@@ -20,6 +21,8 @@ export default function Sidebar({
   setActiveView,
   isCollapsed,
   setIsCollapsed,
+  isMobileOpen = false,
+  onCloseMobile,
   projectCount = 0
 }) {
   const navItems = [
@@ -82,11 +85,22 @@ export default function Sidebar({
   ];
 
   return (
-    <aside
-      className={`relative z-20 flex flex-col border-r border-studio-border bg-[#0C0E1B] transition-all duration-300 ease-in-out select-none ${
-        isCollapsed ? 'w-20' : 'w-64'
-      }`}
-    >
+    <>
+      {isMobileOpen && (
+        <button
+          type="button"
+          className="fixed inset-0 z-30 bg-black/60 md:hidden"
+          onClick={onCloseMobile}
+          aria-label="Close navigation menu"
+        />
+      )}
+      <aside
+        id="studio-sidebar"
+        aria-label="Main navigation"
+        className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-studio-border bg-[#0C0E1B] transition-transform duration-300 ease-in-out select-none md:relative md:z-20 md:translate-x-0 ${
+          isMobileOpen ? 'translate-x-0' : '-translate-x-full'
+        } ${isCollapsed ? 'md:w-20' : 'md:w-64'}`}
+      >
       {/* Brand Header */}
       <div className="flex h-16 items-center justify-between border-b border-studio-border px-4">
         {!isCollapsed && (
@@ -112,13 +126,23 @@ export default function Sidebar({
         )}
 
         <button
+          type="button"
           onClick={() => setIsCollapsed(!isCollapsed)}
           className={`flex h-7 w-7 items-center justify-center rounded-lg border border-studio-border bg-studio-card text-slate-400 hover:text-white hover:bg-studio-hover transition-colors ${
             isCollapsed ? 'hidden' : 'flex'
           }`}
           title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           <ChevronLeft className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          onClick={onCloseMobile}
+          className="flex h-8 w-8 items-center justify-center rounded-lg border border-studio-border bg-studio-card text-slate-400 hover:text-white md:hidden"
+          aria-label="Close navigation menu"
+        >
+          <X className="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
 
@@ -139,6 +163,7 @@ export default function Sidebar({
           return (
             <button
               key={item.id}
+              type="button"
               onClick={() => setActiveView(item.id)}
               className={`group relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
                 isActive
@@ -146,6 +171,7 @@ export default function Sidebar({
                   : 'text-slate-400 hover:bg-studio-card hover:text-slate-200 border border-transparent'
               }`}
               title={isCollapsed ? item.label : undefined}
+              aria-current={isActive ? 'page' : undefined}
             >
               <div
                 className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors ${
@@ -177,6 +203,7 @@ export default function Sidebar({
       {/* Bottom Footer & Settings */}
       <div className="border-t border-studio-border p-3 space-y-2">
         <button
+          type="button"
           onClick={() => setActiveView('settings')}
           className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all ${
             activeView === 'settings'
@@ -184,6 +211,7 @@ export default function Sidebar({
               : 'text-slate-400 hover:bg-studio-card hover:text-white border border-transparent'
           }`}
           title="AI Providers & Settings"
+          aria-current={activeView === 'settings' ? 'page' : undefined}
         >
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-studio-card text-slate-400">
             <Settings className="h-4 w-4" />
@@ -205,7 +233,9 @@ export default function Sidebar({
         ) : (
           <div className="flex justify-center py-1">
             <button
+              type="button"
               onClick={() => setIsCollapsed(false)}
+              aria-label="Expand sidebar"
               className="flex h-7 w-7 items-center justify-center rounded-lg border border-studio-border bg-studio-card text-slate-400 hover:text-white"
             >
               <ChevronRight className="h-4 w-4" />
@@ -213,7 +243,8 @@ export default function Sidebar({
           </div>
         )}
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }
 

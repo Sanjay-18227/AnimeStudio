@@ -141,6 +141,7 @@ const CREATIVE_MODES = [
 export default function ChatStudio({
   activeProject,
   language = 'en',
+  onNotify,
   onOpenSettings
 }) {
   const isTamil = language === 'ta';
@@ -189,6 +190,7 @@ export default function ChatStudio({
       }
     } catch (e) {
       console.warn('Could not load user settings:', e);
+      onNotify?.('error', e.message || (isTamil ? 'விருப்பங்களை ஏற்ற முடியவில்லை.' : 'Could not load your settings.'));
     }
   };
 

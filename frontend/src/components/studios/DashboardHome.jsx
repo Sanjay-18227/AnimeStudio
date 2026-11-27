@@ -23,6 +23,7 @@ export default function DashboardHome({
   projects = [],
   setActiveView,
   onOpenNewProjectModal,
+  onOpenProjects,
   systemHealth,
   language = 'en'
 }) {
@@ -153,18 +154,21 @@ export default function DashboardHome({
 
           {/* Active Project Highlight Card */}
           {activeProject ? (
-            <div className="shrink-0 rounded-xl border border-studio-border bg-studio-card/90 p-5 backdrop-blur-md w-full md:w-72 shadow-lg space-y-3">
+            <section className="w-full shrink-0 space-y-3 rounded-xl border border-studio-border bg-studio-card/90 p-5 shadow-lg backdrop-blur-md md:w-72" aria-label="Active project">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-studio-purple-light">
                   {isTamil ? 'செயலில் உள்ள திட்டம்' : 'Active Project'}
                 </span>
                 <span className="rounded-md border border-studio-border bg-studio-elevated px-2 py-0.5 text-[10px] font-semibold text-slate-300">
-                  {activeProject.genre}
+                  {activeProject.genre || 'Shonen'}
                 </span>
               </div>
 
               <div>
                 <h3 className="font-bold text-white text-base truncate">{activeProject.title}</h3>
+                <p className="text-[11px] text-studio-cyan">
+                  {activeProject.target_audience || 'General'} · {projects.length} {isTamil ? 'திட்டங்கள்' : 'projects'}
+                </p>
                 <p className="text-xs text-slate-400 line-clamp-2 mt-1">
                   {activeProject.description || (isTamil ? 'விளக்கம் இல்லை' : 'No description provided')}
                 </p>
@@ -184,7 +188,14 @@ export default function DashboardHome({
                   <div className="text-[9px] text-slate-400 uppercase">Images</div>
                 </div>
               </div>
-            </div>
+              <button
+                type="button"
+                onClick={onOpenProjects}
+                className="w-full rounded-lg border border-studio-border px-3 py-2 text-xs font-semibold text-studio-purple-light transition-colors hover:bg-studio-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-studio-purple"
+              >
+                {isTamil ? 'திட்டங்களை நிர்வகி' : 'Manage projects'}
+              </button>
+            </section>
           ) : (
             <div className="shrink-0 rounded-xl border border-dashed border-studio-border bg-studio-card/40 p-5 w-full md:w-72 flex flex-col items-center justify-center text-center space-y-2">
               <FolderPlus className="h-8 w-8 text-slate-500" />
@@ -192,6 +203,7 @@ export default function DashboardHome({
                 {isTamil ? 'திட்டம் எதுவும் தேர்ந்தெடுக்கப்படவில்லை' : 'No Project Selected'}
               </div>
               <button
+                type="button"
                 onClick={onOpenNewProjectModal}
                 className="text-xs font-bold text-studio-purple-light hover:underline"
               >
@@ -315,10 +327,9 @@ export default function DashboardHome({
           {studioCards.map((studio) => {
             const Icon = studio.icon;
             return (
-              <div
+              <article
                 key={studio.id}
-                onClick={() => setActiveView(studio.id)}
-                className="group relative flex flex-col justify-between rounded-xl border border-studio-border bg-studio-card p-6 hover:border-studio-purple/50 hover:bg-studio-elevated transition-all duration-200 cursor-pointer shadow-md hover:shadow-glow-purple"
+                className="group relative flex flex-col justify-between rounded-xl border border-studio-border bg-studio-card p-6 shadow-md transition-all duration-200 hover:border-studio-purple/50 hover:bg-studio-elevated hover:shadow-glow-purple"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
@@ -344,11 +355,16 @@ export default function DashboardHome({
                   </p>
                 </div>
 
-                <div className="flex items-center gap-1.5 text-xs font-semibold text-studio-purple-light mt-4 pt-3 border-t border-studio-border/60 group-hover:translate-x-1 transition-transform">
+                <button
+                  type="button"
+                  onClick={() => setActiveView(studio.id)}
+                  className="flex w-full items-center gap-1.5 border-t border-studio-border/60 pt-3 text-left text-xs font-semibold text-studio-purple-light transition-transform group-hover:translate-x-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-studio-purple"
+                  aria-label={`${studio.title}: open studio`}
+                >
                   <span>{isTamil ? 'ஸ்டுடியோ திற' : 'Open Studio'}</span>
                   <ArrowRight className="h-3.5 w-3.5" />
-                </div>
-              </div>
+                </button>
+              </article>
             );
           })}
         </div>
