@@ -141,6 +141,7 @@ const CREATIVE_MODES = [
 export default function ChatStudio({
   activeProject,
   language = 'en',
+  onNotify,
   onOpenSettings
 }) {
   const isTamil = language === 'ta';
@@ -154,11 +155,20 @@ export default function ChatStudio({
   const [loading, setLoading] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
   const [error, setError] = useState(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => window.innerWidth >= 768);
   const [searchQuery, setSearchQuery] = useState('');
   const [copiedIndex, setCopiedIndex] = useState(null);
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [userSettings, setUserSettings] = useState(null);
+
+  useEffect(() => {
+    const collapseSidebarOnNarrowViewport = () => {
+      if (window.innerWidth < 768) setIsSidebarOpen(false);
+    };
+
+    window.addEventListener('resize', collapseSidebarOnNarrowViewport);
+    return () => window.removeEventListener('resize', collapseSidebarOnNarrowViewport);
+  }, []);
   const [isQuickListening, setIsQuickListening] = useState(false);
 
   const messagesEndRef = useRef(null);
@@ -189,6 +199,7 @@ export default function ChatStudio({
       }
     } catch (e) {
       console.warn('Could not load user settings:', e);
+      onNotify?.('error', e.message || (isTamil ? 'விருப்பங்களை ஏற்ற முடியவில்லை.' : 'Could not load your settings.'));
     }
   };
 
@@ -532,7 +543,7 @@ export default function ChatStudio({
               className="flex items-center gap-1.5 rounded-xl border border-studio-purple/40 bg-studio-purple/15 px-3 py-1.5 text-xs font-semibold text-studio-purple-light hover:bg-studio-purple hover:text-white transition-all shadow-sm"
               title="Launch Hands-Free Voice Mode"
             >
-              <Radio className="h-3.5 w-3.5 text-studio-cyan animate-pulse" />
+              <Radio className="h-3.5 w-3.5 text-violet-400 animate-pulse" />
               <span>Voice Mode</span>
             </button>
 
@@ -561,7 +572,7 @@ export default function ChatStudio({
             /* Welcome Empty State */
             <div className="flex flex-col items-center justify-center h-full max-w-xl mx-auto text-center space-y-5 py-6">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-studio-purple via-indigo-600 to-studio-cyan text-white shadow-glow-purple">
-                <activeModeObj.icon className="h-7 w-7" />
+                <activeModeObj.icon className="h-7 w-7 text-violet-400" />
               </div>
 
               <div className="space-y-1.5">
@@ -611,7 +622,7 @@ export default function ChatStudio({
                 >
                   {!isUser && (
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-studio-purple to-indigo-600 text-white shadow-sm mt-0.5">
-                      <Bot className="h-4 w-4" />
+                      <Bot className="h-4 w-4 text-violet-400" />
                     </div>
                   )}
 
@@ -711,7 +722,7 @@ export default function ChatStudio({
           {loading && (
             <div className="flex gap-3.5 justify-start">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-studio-purple to-indigo-600 text-white shadow-sm animate-pulse">
-                <Bot className="h-4 w-4" />
+                <Bot className="h-4 w-4 text-violet-400" />
               </div>
               <div className="rounded-2xl rounded-tl-none border border-studio-border bg-studio-card p-4 text-xs text-slate-300 flex items-center gap-3">
                 <div className="flex space-x-1">

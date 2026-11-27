@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   BookOpen,
   Plus,
@@ -47,8 +47,10 @@ import {
   exportMangaStory
 } from '../../services/api';
 import MangaStoryWizard from '../manga/MangaStoryWizard';
+import LoadingIndicator from '../ui/LoadingIndicator';
+import Toast from '../ui/Toast';
 
-export default function MangaStudio({ activeProject, language = 'en' }) {
+export default function MangaStudio({ activeProject, language = 'en', onNotify }) {
   const isTamil = language === 'ta';
 
   // Navigation Tabs: 'editor' | 'overview' | 'grid' | 'export'
@@ -58,6 +60,9 @@ export default function MangaStudio({ activeProject, language = 'en' }) {
   const [stories, setStories] = useState([]);
   const [activeStory, setActiveStory] = useState(null);
   const [loadingStories, setLoadingStories] = useState(false);
+  const [storiesLoadError, setStoriesLoadError] = useState('');
+  const storiesRequestIdRef = useRef(0);
+  const storyDetailsRequestIdRef = useRef(0);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
 
   // Active Editor Navigation State
@@ -82,37 +87,60 @@ export default function MangaStudio({ activeProject, language = 'en' }) {
   const [rewriteModalOpen, setRewriteModalOpen] = useState(false);
   const [rewriteFocusPrompt, setRewriteFocusPrompt] = useState('');
 
+  const projectId = activeProject?.id;
+
   // Initial load when activeProject changes
   useEffect(() => {
-    if (activeProject && activeProject.id) {
-      loadProjectStories(activeProject.id);
+    if (projectId) {
+      loadProjectStories(projectId);
     } else {
+      storiesRequestIdRef.current += 1;
+      storyDetailsRequestIdRef.current += 1;
       setStories([]);
       setActiveStory(null);
+      setLoadingStories(false);
+      setStoriesLoadError('');
     }
-  }, [activeProject]);
+  }, [projectId]);
 
   const loadProjectStories = async (projectId) => {
+    const requestId = ++storiesRequestIdRef.current;
     setLoadingStories(true);
+    setStoriesLoadError('');
+    setStories([]);
+    setActiveStory(null);
+    setHistory([]);
+    setHistoryIndex(-1);
+    setActiveChapterIndex(0);
+    setActiveSceneIndex(0);
     try {
       const data = await getProjectMangaStories(projectId);
+      if (requestId !== storiesRequestIdRef.current) return;
       setStories(data || []);
       if (data && data.length > 0) {
         // Load first story
-        loadStoryDetails(data[0].id);
-      } else {
-        setActiveStory(null);
+        await loadStoryDetails(data[0].id, requestId);
       }
     } catch (err) {
+      if (requestId !== storiesRequestIdRef.current) return;
       console.error('Failed to load project manga stories:', err);
+      setStories([]);
+      setActiveStory(null);
+      const message = err.message || (isTamil ? 'மங்கா கதைகளை ஏற்ற முடியவில்லை.' : 'Could not load manga stories.');
+      setStoriesLoadError(message);
+      showToast(message, 'error');
     } finally {
-      setLoadingStories(false);
+      if (requestId === storiesRequestIdRef.current) {
+        setLoadingStories(false);
+      }
     }
   };
 
-  const loadStoryDetails = async (storyId) => {
+  const loadStoryDetails = async (storyId, storiesRequestId = storiesRequestIdRef.current) => {
+    const requestId = ++storyDetailsRequestIdRef.current;
     try {
       const full = await getMangaStory(storyId);
+      if (storiesRequestId !== storiesRequestIdRef.current || requestId !== storyDetailsRequestIdRef.current) return;
       setActiveStory(full);
       setActiveChapterIndex(0);
       setActiveSceneIndex(0);
@@ -120,13 +148,18 @@ export default function MangaStudio({ activeProject, language = 'en' }) {
       setHistory([JSON.stringify(full)]);
       setHistoryIndex(0);
     } catch (err) {
+      if (storiesRequestId !== storiesRequestIdRef.current || requestId !== storyDetailsRequestIdRef.current) return;
       console.error('Failed to load manga story details:', err);
+      showToast(err.message || 'Could not load this manga story.', 'error');
     }
   };
 
   const showToast = (message, type = 'success') => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 3000);
+    if (onNotify) {
+      onNotify(type, message);
+    } else {
+      setToast({ message, type });
+    }
   };
 
   // Push to Undo history
@@ -451,7 +484,7 @@ export default function MangaStudio({ activeProject, language = 'en' }) {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="font-display text-2xl font-bold text-white flex items-center gap-2.5">
-              <BookOpen className="h-6 w-6 text-studio-cyan" />
+              <BookOpen className="h-6 w-6 text-orange-400" />
               <span>{isTamil ? 'மங்கா ஸ்டுடியோ' : 'Manga Studio'}</span>
               <span className="rounded-md border border-studio-cyan/30 bg-studio-cyan/10 px-2 py-0.5 text-xs font-bold text-studio-cyan">
                 Phase 3 Engine
@@ -486,6 +519,7 @@ export default function MangaStudio({ activeProject, language = 'en' }) {
           </div>
 
           <button
+            type="button"
             onClick={() => setIsWizardOpen(true)}
             className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-studio-cyan to-blue-600 px-4 py-2 text-xs font-bold text-black hover:opacity-95 transition-all shadow-md"
           >
@@ -497,21 +531,28 @@ export default function MangaStudio({ activeProject, language = 'en' }) {
 
       {/* Global Toast */}
       {toast && (
-        <div
-          className={`rounded-xl border p-3 text-xs font-semibold flex items-center justify-between shadow-lg transition-all animate-in fade-in duration-200 ${
-            toast.type === 'error'
-              ? 'border-rose-500/40 bg-rose-500/10 text-rose-300'
-              : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300'
-          }`}
-        >
-          <span>{toast.message}</span>
-          <button onClick={() => setToast(null)} className="text-slate-400 hover:text-white ml-2">×</button>
+        <div className="fixed right-4 top-4 z-[60] w-[calc(100%-2rem)] sm:right-6 sm:max-w-md">
+          <Toast toast={toast} onDismiss={() => setToast(null)} />
+        </div>
+      )}
+
+      {loadingStories && <LoadingIndicator label={isTamil ? 'கதைகள் ஏற்றப்படுகின்றன...' : 'Loading manga stories...'} />}
+      {!loadingStories && storiesLoadError && (
+        <div role="alert" className="mx-auto max-w-lg rounded-xl border border-red-500/30 bg-red-500/5 p-4 text-center">
+          <p className="text-sm text-red-200">{storiesLoadError}</p>
+          <button
+            type="button"
+            onClick={() => projectId && loadProjectStories(projectId)}
+            className="mt-3 rounded-lg border border-red-400/30 px-3 py-1.5 text-xs text-red-200 hover:bg-red-500/10"
+          >
+            {isTamil ? 'மீண்டும் முயற்சி செய்' : 'Try again'}
+          </button>
         </div>
       )}
 
       {/* Navigation Sub-Tabs & Actions Bar */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-studio-border pb-2">
-        <div className="flex gap-2">
+        <div className="flex min-w-0 flex-wrap gap-2">
           <button
             onClick={() => setActiveTab('editor')}
             className={`flex items-center gap-2 py-2 px-3 text-xs font-semibold border-b-2 transition-colors ${
@@ -613,7 +654,7 @@ export default function MangaStudio({ activeProject, language = 'en' }) {
       {/* ======================================================== */}
       {/* EMPTY STATE: NO STORIES YET */}
       {/* ======================================================== */}
-      {!loadingStories && stories.length === 0 && (
+      {!loadingStories && !storiesLoadError && stories.length === 0 && (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-studio-border bg-studio-card/60 p-12 text-center space-y-4 max-w-lg mx-auto">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-studio-cyan/10 text-studio-cyan">
             <BookOpen className="h-7 w-7" />

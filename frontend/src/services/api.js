@@ -4,10 +4,47 @@
 
 const API_BASE = '/api';
 
+function formatApiDetail(detail) {
+  if (typeof detail === 'string') return detail;
+  if (Array.isArray(detail)) {
+    return detail
+      .map((item) => {
+        const location = Array.isArray(item.loc) ? item.loc.filter((part) => part !== 'body').join(' → ') : '';
+        return [location, item.msg].filter(Boolean).join(': ');
+      })
+      .filter(Boolean)
+      .join('\n');
+  }
+  return null;
+}
+
+async function apiFetch(url, options) {
+  let response;
+  try {
+    response = await fetch(url, options);
+  } catch (error) {
+    if (error.name === 'AbortError') throw error;
+    throw new Error('Unable to connect to Anime Studio. Check that the backend is running and try again.');
+  }
+
+  if (!response.ok) {
+    let detail;
+    try {
+      detail = formatApiDetail((await response.clone().json()).detail);
+    } catch {
+      detail = null;
+    }
+
+    throw new Error(detail || `Request failed (${response.status}). Please try again.`);
+  }
+
+  return response;
+}
+
 // Health & System
 export async function fetchHealth() {
   try {
-    const res = await fetch(`${API_BASE}/health`);
+    const res = await apiFetch(`${API_BASE}/health`);
     if (!res.ok) throw new Error(`Health check failed: ${res.statusText}`);
     return await res.json();
   } catch (error) {
@@ -19,7 +56,7 @@ export async function fetchHealth() {
 // Project Management
 export async function getProjects() {
   try {
-    const res = await fetch(`${API_BASE}/projects`);
+    const res = await apiFetch(`${API_BASE}/projects`);
     if (!res.ok) throw new Error(`Failed to fetch projects: ${res.statusText}`);
     return await res.json();
   } catch (error) {
@@ -30,7 +67,7 @@ export async function getProjects() {
 
 export async function createProject(projectData) {
   try {
-    const res = await fetch(`${API_BASE}/projects`, {
+    const res = await apiFetch(`${API_BASE}/projects`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(projectData),
@@ -45,7 +82,7 @@ export async function createProject(projectData) {
 
 export async function getProject(projectId) {
   try {
-    const res = await fetch(`${API_BASE}/projects/${projectId}`);
+    const res = await apiFetch(`${API_BASE}/projects/${projectId}`);
     if (!res.ok) throw new Error(`Failed to get project: ${res.statusText}`);
     return await res.json();
   } catch (error) {
@@ -56,7 +93,7 @@ export async function getProject(projectId) {
 
 export async function updateProject(projectId, updateData) {
   try {
-    const res = await fetch(`${API_BASE}/projects/${projectId}`, {
+    const res = await apiFetch(`${API_BASE}/projects/${projectId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updateData),
@@ -71,7 +108,7 @@ export async function updateProject(projectId, updateData) {
 
 export async function deleteProject(projectId) {
   try {
-    const res = await fetch(`${API_BASE}/projects/${projectId}`, {
+    const res = await apiFetch(`${API_BASE}/projects/${projectId}`, {
       method: 'DELETE',
     });
     if (!res.ok && res.status !== 204) throw new Error(`Failed to delete project: ${res.statusText}`);
@@ -88,7 +125,7 @@ export async function deleteProject(projectId) {
 
 export async function getAIProviders() {
   try {
-    const res = await fetch(`${API_BASE}/ai/providers`);
+    const res = await apiFetch(`${API_BASE}/ai/providers`);
     if (!res.ok) throw new Error(`Failed to fetch providers: ${res.statusText}`);
     return await res.json();
   } catch (error) {
@@ -99,18 +136,18 @@ export async function getAIProviders() {
 
 export async function getAIStatus() {
   try {
-    const res = await fetch(`${API_BASE}/ai/status`);
+    const res = await apiFetch(`${API_BASE}/ai/status`);
     if (!res.ok) throw new Error(`Failed to fetch AI status: ${res.statusText}`);
     return await res.json();
   } catch (error) {
     console.error('API Error (getAIStatus):', error);
-    return null;
+    throw error;
   }
 }
 
 export async function testAIProvider(providerName, model = null) {
   try {
-    const res = await fetch(`${API_BASE}/ai/test`, {
+    const res = await apiFetch(`${API_BASE}/ai/test`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ provider_name: providerName, model }),
@@ -132,7 +169,7 @@ export async function testAIProvider(providerName, model = null) {
 
 export async function sendChatMessage(messageData) {
   try {
-    const res = await fetch(`${API_BASE}/chat`, {
+    const res = await apiFetch(`${API_BASE}/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(messageData),
@@ -150,7 +187,7 @@ export async function sendChatMessage(messageData) {
 
 export async function regenerateChatMessage(conversationId) {
   try {
-    const res = await fetch(`${API_BASE}/chat/conversations/${conversationId}/regenerate`, {
+    const res = await apiFetch(`${API_BASE}/chat/conversations/${conversationId}/regenerate`, {
       method: 'POST',
     });
     if (!res.ok) {
@@ -172,7 +209,7 @@ export async function getConversations(projectId = null, mode = null, search = n
     if (search && search.trim()) params.append('search', search.trim());
 
     const url = `${API_BASE}/chat/conversations${params.toString() ? `?${params.toString()}` : ''}`;
-    const res = await fetch(url);
+    const res = await apiFetch(url);
     if (!res.ok) throw new Error(`Failed to fetch conversations: ${res.statusText}`);
     return await res.json();
   } catch (error) {
@@ -183,7 +220,7 @@ export async function getConversations(projectId = null, mode = null, search = n
 
 export async function getConversation(conversationId) {
   try {
-    const res = await fetch(`${API_BASE}/chat/conversations/${conversationId}`);
+    const res = await apiFetch(`${API_BASE}/chat/conversations/${conversationId}`);
     if (!res.ok) throw new Error(`Failed to get conversation: ${res.statusText}`);
     return await res.json();
   } catch (error) {
@@ -194,7 +231,7 @@ export async function getConversation(conversationId) {
 
 export async function deleteConversation(conversationId) {
   try {
-    const res = await fetch(`${API_BASE}/chat/conversations/${conversationId}`, {
+    const res = await apiFetch(`${API_BASE}/chat/conversations/${conversationId}`, {
       method: 'DELETE',
     });
     if (!res.ok && res.status !== 204) throw new Error(`Failed to delete conversation: ${res.statusText}`);
@@ -211,18 +248,18 @@ export async function deleteConversation(conversationId) {
 
 export async function getUserSettings() {
   try {
-    const res = await fetch(`${API_BASE}/settings`);
+    const res = await apiFetch(`${API_BASE}/settings`);
     if (!res.ok) throw new Error(`Failed to fetch settings: ${res.statusText}`);
     return await res.json();
   } catch (error) {
     console.error('API Error (getUserSettings):', error);
-    return null;
+    throw error;
   }
 }
 
 export async function updateUserSettings(settingsData) {
   try {
-    const res = await fetch(`${API_BASE}/settings`, {
+    const res = await apiFetch(`${API_BASE}/settings`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(settingsData),
@@ -237,7 +274,7 @@ export async function updateUserSettings(settingsData) {
 
 export async function resetUserSettings() {
   try {
-    const res = await fetch(`${API_BASE}/settings/reset`, {
+    const res = await apiFetch(`${API_BASE}/settings/reset`, {
       method: 'POST',
     });
     if (!res.ok) throw new Error(`Failed to reset settings: ${res.statusText}`);
@@ -254,18 +291,18 @@ export async function resetUserSettings() {
 
 export async function getProjectMemories(projectId) {
   try {
-    const res = await fetch(`${API_BASE}/projects/${projectId}/memories`);
+    const res = await apiFetch(`${API_BASE}/projects/${projectId}/memories`);
     if (!res.ok) throw new Error(`Failed to fetch project memories: ${res.statusText}`);
     return await res.json();
   } catch (error) {
     console.error('API Error (getProjectMemories):', error);
-    return [];
+    throw error;
   }
 }
 
 export async function createProjectMemory(projectId, memoryData) {
   try {
-    const res = await fetch(`${API_BASE}/projects/${projectId}/memories`, {
+    const res = await apiFetch(`${API_BASE}/projects/${projectId}/memories`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(memoryData),
@@ -280,7 +317,7 @@ export async function createProjectMemory(projectId, memoryData) {
 
 export async function updateProjectMemory(projectId, memoryId, memoryData) {
   try {
-    const res = await fetch(`${API_BASE}/projects/${projectId}/memories/${memoryId}`, {
+    const res = await apiFetch(`${API_BASE}/projects/${projectId}/memories/${memoryId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(memoryData),
@@ -295,7 +332,7 @@ export async function updateProjectMemory(projectId, memoryId, memoryData) {
 
 export async function deleteProjectMemory(projectId, memoryId) {
   try {
-    const res = await fetch(`${API_BASE}/projects/${projectId}/memories/${memoryId}`, {
+    const res = await apiFetch(`${API_BASE}/projects/${projectId}/memories/${memoryId}`, {
       method: 'DELETE',
     });
     if (!res.ok && res.status !== 204) throw new Error(`Failed to delete memory: ${res.statusText}`);
@@ -308,7 +345,7 @@ export async function deleteProjectMemory(projectId, memoryId) {
 
 export async function clearProjectMemories(projectId) {
   try {
-    const res = await fetch(`${API_BASE}/projects/${projectId}/memories`, {
+    const res = await apiFetch(`${API_BASE}/projects/${projectId}/memories`, {
       method: 'DELETE',
     });
     if (!res.ok && res.status !== 204) throw new Error(`Failed to clear memories: ${res.statusText}`);
@@ -320,12 +357,76 @@ export async function clearProjectMemories(projectId) {
 }
 
 // ========================================================
+// Character Studio (Phase 4)
+// ========================================================
+
+export async function getProjectCharacters(projectId) {
+  try {
+    const res = await apiFetch(`${API_BASE}/projects/${projectId}/characters`);
+    if (!res.ok) throw new Error(`Failed to fetch characters: ${res.statusText}`);
+    return await res.json();
+  } catch (error) {
+    console.error('API Error (getProjectCharacters):', error);
+    throw error;
+  }
+}
+
+export async function createProjectCharacter(projectId, characterData) {
+  try {
+    const res = await apiFetch(`${API_BASE}/projects/${projectId}/characters`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(characterData),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || `Failed to create character: ${res.statusText}`);
+    }
+    return await res.json();
+  } catch (error) {
+    console.error('API Error (createProjectCharacter):', error);
+    throw error;
+  }
+}
+
+export async function updateProjectCharacter(projectId, characterId, characterData) {
+  try {
+    const res = await apiFetch(`${API_BASE}/projects/${projectId}/characters/${characterId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(characterData),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || `Failed to update character: ${res.statusText}`);
+    }
+    return await res.json();
+  } catch (error) {
+    console.error('API Error (updateProjectCharacter):', error);
+    throw error;
+  }
+}
+
+export async function deleteProjectCharacter(projectId, characterId) {
+  try {
+    const res = await apiFetch(`${API_BASE}/projects/${projectId}/characters/${characterId}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok && res.status !== 204) throw new Error(`Failed to delete character: ${res.statusText}`);
+    return true;
+  } catch (error) {
+    console.error('API Error (deleteProjectCharacter):', error);
+    throw error;
+  }
+}
+
+// ========================================================
 // Manga Studio & Script Generation (Phase 3)
 // ========================================================
 
 export async function generateMangaStory(storyData) {
   try {
-    const res = await fetch(`${API_BASE}/manga/generate`, {
+    const res = await apiFetch(`${API_BASE}/manga/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(storyData),
@@ -343,18 +444,18 @@ export async function generateMangaStory(storyData) {
 
 export async function getProjectMangaStories(projectId) {
   try {
-    const res = await fetch(`${API_BASE}/manga/projects/${projectId}/stories`);
+    const res = await apiFetch(`${API_BASE}/manga/projects/${projectId}/stories`);
     if (!res.ok) throw new Error(`Failed to fetch manga stories: ${res.statusText}`);
     return await res.json();
   } catch (error) {
     console.error('API Error (getProjectMangaStories):', error);
-    return [];
+    throw error;
   }
 }
 
 export async function getMangaStory(storyId) {
   try {
-    const res = await fetch(`${API_BASE}/manga/stories/${storyId}`);
+    const res = await apiFetch(`${API_BASE}/manga/stories/${storyId}`);
     if (!res.ok) throw new Error(`Failed to fetch manga story: ${res.statusText}`);
     return await res.json();
   } catch (error) {
@@ -365,7 +466,7 @@ export async function getMangaStory(storyId) {
 
 export async function updateMangaStory(storyId, updateData) {
   try {
-    const res = await fetch(`${API_BASE}/manga/stories/${storyId}`, {
+    const res = await apiFetch(`${API_BASE}/manga/stories/${storyId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updateData),
@@ -380,7 +481,7 @@ export async function updateMangaStory(storyId, updateData) {
 
 export async function deleteMangaStory(storyId) {
   try {
-    const res = await fetch(`${API_BASE}/manga/stories/${storyId}`, {
+    const res = await apiFetch(`${API_BASE}/manga/stories/${storyId}`, {
       method: 'DELETE',
     });
     if (!res.ok && res.status !== 204) throw new Error(`Failed to delete manga story: ${res.statusText}`);
@@ -393,7 +494,7 @@ export async function deleteMangaStory(storyId) {
 
 export async function generateMangaChapter(storyId, chapterData) {
   try {
-    const res = await fetch(`${API_BASE}/manga/stories/${storyId}/chapters`, {
+    const res = await apiFetch(`${API_BASE}/manga/stories/${storyId}/chapters`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(chapterData),
@@ -411,7 +512,7 @@ export async function generateMangaChapter(storyId, chapterData) {
 
 export async function updateMangaChapter(chapterId, updateData) {
   try {
-    const res = await fetch(`${API_BASE}/manga/chapters/${chapterId}`, {
+    const res = await apiFetch(`${API_BASE}/manga/chapters/${chapterId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updateData),
@@ -426,7 +527,7 @@ export async function updateMangaChapter(chapterId, updateData) {
 
 export async function deleteMangaChapter(chapterId) {
   try {
-    const res = await fetch(`${API_BASE}/manga/chapters/${chapterId}`, {
+    const res = await apiFetch(`${API_BASE}/manga/chapters/${chapterId}`, {
       method: 'DELETE',
     });
     if (!res.ok && res.status !== 204) throw new Error(`Failed to delete chapter: ${res.statusText}`);
@@ -439,7 +540,7 @@ export async function deleteMangaChapter(chapterId) {
 
 export async function addMangaScene(chapterId, sceneData) {
   try {
-    const res = await fetch(`${API_BASE}/manga/chapters/${chapterId}/scenes`, {
+    const res = await apiFetch(`${API_BASE}/manga/chapters/${chapterId}/scenes`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(sceneData),
@@ -454,7 +555,7 @@ export async function addMangaScene(chapterId, sceneData) {
 
 export async function updateMangaScene(sceneId, updateData) {
   try {
-    const res = await fetch(`${API_BASE}/manga/scenes/${sceneId}`, {
+    const res = await apiFetch(`${API_BASE}/manga/scenes/${sceneId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updateData),
@@ -469,7 +570,7 @@ export async function updateMangaScene(sceneId, updateData) {
 
 export async function deleteMangaScene(sceneId) {
   try {
-    const res = await fetch(`${API_BASE}/manga/scenes/${sceneId}`, {
+    const res = await apiFetch(`${API_BASE}/manga/scenes/${sceneId}`, {
       method: 'DELETE',
     });
     if (!res.ok && res.status !== 204) throw new Error(`Failed to delete scene: ${res.statusText}`);
@@ -482,7 +583,7 @@ export async function deleteMangaScene(sceneId) {
 
 export async function addMangaPanel(sceneId, panelData) {
   try {
-    const res = await fetch(`${API_BASE}/manga/scenes/${sceneId}/panels`, {
+    const res = await apiFetch(`${API_BASE}/manga/scenes/${sceneId}/panels`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(panelData),
@@ -497,7 +598,7 @@ export async function addMangaPanel(sceneId, panelData) {
 
 export async function updateMangaPanel(panelId, updateData) {
   try {
-    const res = await fetch(`${API_BASE}/manga/panels/${panelId}`, {
+    const res = await apiFetch(`${API_BASE}/manga/panels/${panelId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updateData),
@@ -512,7 +613,7 @@ export async function updateMangaPanel(panelId, updateData) {
 
 export async function deleteMangaPanel(panelId) {
   try {
-    const res = await fetch(`${API_BASE}/manga/panels/${panelId}`, {
+    const res = await apiFetch(`${API_BASE}/manga/panels/${panelId}`, {
       method: 'DELETE',
     });
     if (!res.ok && res.status !== 204) throw new Error(`Failed to delete panel: ${res.statusText}`);
@@ -525,7 +626,7 @@ export async function deleteMangaPanel(panelId) {
 
 export async function transformMangaScript(transformData) {
   try {
-    const res = await fetch(`${API_BASE}/manga/ai/transform`, {
+    const res = await apiFetch(`${API_BASE}/manga/ai/transform`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(transformData),
@@ -540,7 +641,7 @@ export async function transformMangaScript(transformData) {
 
 export async function exportMangaStory(storyId, format = 'markdown') {
   try {
-    const res = await fetch(`${API_BASE}/manga/stories/${storyId}/export/${format}`);
+    const res = await apiFetch(`${API_BASE}/manga/stories/${storyId}/export/${format}`);
     if (!res.ok) throw new Error(`Failed to export story: ${res.statusText}`);
     return await res.text();
   } catch (error) {

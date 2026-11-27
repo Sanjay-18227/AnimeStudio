@@ -26,10 +26,10 @@ export default function PhotoToAnimeStudio({ activeProject, language = 'en' }) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-studio-border pb-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-studio-border pb-4">
         <div>
           <h1 className="font-display text-2xl font-bold text-white flex items-center gap-2.5">
-            <Camera className="h-6 w-6 text-amber-400" />
+            <Camera className="h-6 w-6 text-blue-400" />
             <span>{isTamil ? 'புகைப்படம்-முதல்-அனிம்' : 'Photo-to-Anime Studio'}</span>
             <span className="rounded-md border border-studio-border bg-studio-card px-2 py-0.5 text-xs font-semibold text-amber-400">
               Phase 6 Architecture
@@ -152,7 +152,7 @@ export default function PhotoToAnimeStudio({ activeProject, language = 'en' }) {
           </div>
 
           <div className="rounded-2xl border border-dashed border-studio-border bg-studio-card/60 p-6 text-center space-y-2">
-            <SplitSquareVertical className="h-8 w-8 text-amber-400 mx-auto" />
+            <SplitSquareVertical className="h-8 w-8 text-blue-400 mx-auto" />
             <h4 className="text-xs font-bold text-white">Before / After Split Viewer</h4>
             <p className="text-[11px] text-slate-400">
               Interactive split-slider comparison will display your input photo alongside the stylized anime render in Phase 6.

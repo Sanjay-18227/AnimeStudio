@@ -3,48 +3,191 @@
 @tailwind utilities;
 
 @layer base {
+  *,
+  *::before,
+  *::after {
+    border-color: #222222;
+  }
+
+  :root {
+    color-scheme: dark;
+    --studio-bg: #000000;
+    --studio-border: #222222;
+    --studio-text: #ffffff;
+    --studio-muted: #a1a1aa;
+  }
+
   body {
-    @apply bg-[#0A0C16] text-slate-100 font-sans antialiased;
+    @apply bg-black text-white font-sans antialiased;
+    background-color: var(--studio-bg);
+  }
+
+  #root {
+    min-height: 100%;
+    background-color: var(--studio-bg);
   }
 }
 
-/* Custom modern scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0D101D;
+  background: #000000;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #252B48;
+  background: #222222;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #8B5CF6;
+  background: #444444;
 }
 
-/* Cyber glow and glass animations */
 .glass-panel {
-  background: rgba(18, 21, 38, 0.75);
+  background: #000000;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(42, 48, 86, 0.7);
+  border: 1px solid #222222;
 }
 
 .glass-panel-elevated {
-  background: rgba(26, 30, 54, 0.85);
+  background: #000000;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(139, 92, 246, 0.25);
+  border: 1px solid #222222;
 }
 
-/* Manga screentone dot effect utility */
 .manga-screentone {
-  background-image: radial-gradient(rgba(139, 92, 246, 0.15) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(161, 161, 170, 0.12) 1px, transparent 1px);
   background-size: 12px 12px;
+}
+
+@layer utilities {
+  [class*="bg-"]:not([class*="bg-black"]):not([class*="bg-transparent"]):not([class*="bg-clip-text"]) {
+    background-color: #000000 !important;
+    background-image: none !important;
+  }
+
+  [class*="hover:bg-"]:hover,
+  [class*="focus:bg-"]:focus {
+    background-color: #000000 !important;
+    background-image: none !important;
+  }
+
+  [class*="border-"] {
+    border-color: #222222 !important;
+  }
+
+  [class*="focus:border-"]:focus {
+    border-color: #a1a1aa !important;
+  }
+
+  [class*="focus:ring-"]:focus {
+    --tw-ring-color: #a1a1aa !important;
+  }
+
+  [class*="focus-visible:outline-"]:focus-visible {
+    outline-color: #a1a1aa !important;
+  }
+
+  [class*="text-studio-"]:not(svg),
+  [class*="text-purple-"]:not(svg),
+  [class*="text-violet-"]:not(svg),
+  [class*="text-pink-"]:not(svg),
+  [class*="text-cyan-"]:not(svg),
+  [class*="text-blue-"]:not(svg),
+  [class*="text-indigo-"]:not(svg),
+  [class*="text-emerald-"]:not(svg),
+  [class*="text-green-"]:not(svg),
+  [class*="text-orange-"]:not(svg),
+  [class*="text-amber-"]:not(svg),
+  [class*="text-yellow-"]:not(svg),
+  [class*="text-rose-"]:not(svg),
+  [class*="text-red-"]:not(svg),
+  [class*="text-fuchsia-"]:not(svg) {
+    color: #a1a1aa !important;
+  }
+
+  [class*="text-slate-"]:not(svg),
+  [class*="text-gray-"]:not(svg),
+  [class*="text-zinc-"]:not(svg),
+  [class*="text-neutral-"]:not(svg) {
+    color: #a1a1aa !important;
+  }
+
+  [class*="text-black"]:not(svg) {
+    color: #ffffff !important;
+  }
+
+  [class*="text-transparent"] {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    background-image: none !important;
+    background-clip: border-box !important;
+  }
+
+  :is(h1, h2, h3, h4, h5, h6)[class*="text-"] {
+    color: #ffffff !important;
+  }
+
+  :where([class*="text-studio-purple"] svg:not([class*="text-"]), [class*="text-purple-"] svg:not([class*="text-"]), [class*="text-violet-"] svg:not([class*="text-"])) {
+    color: #a78bfa;
+  }
+
+  :where([class*="text-studio-cyan"] svg:not([class*="text-"]), [class*="text-cyan-"] svg:not([class*="text-"])) {
+    color: #22d3ee;
+  }
+
+  :where([class*="text-pink-"] svg:not([class*="text-"]), [class*="text-fuchsia-"] svg:not([class*="text-"])) {
+    color: #f472b6;
+  }
+
+  :where([class*="text-blue-"] svg:not([class*="text-"])) {
+    color: #60a5fa;
+  }
+
+  :where([class*="text-indigo-"] svg:not([class*="text-"])) {
+    color: #818cf8;
+  }
+
+  :where([class*="text-emerald-"] svg:not([class*="text-"]), [class*="text-green-"] svg:not([class*="text-"])) {
+    color: #4ade80;
+  }
+
+  :where([class*="text-orange-"] svg:not([class*="text-"])) {
+    color: #fb923c;
+  }
+
+  :where([class*="text-amber-"] svg:not([class*="text-"])) {
+    color: #fbbf24;
+  }
+
+  :where([class*="text-yellow-"] svg:not([class*="text-"])) {
+    color: #facc15;
+  }
+
+  :where([class*="text-rose-"] svg:not([class*="text-"]), [class*="text-red-"] svg:not([class*="text-"])) {
+    color: #f87171;
+  }
+}
+
+.mono-visual {
+  background-color: #333333 !important;
+}
+
+@media (max-width: 769px) {
+  button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    min-height: 44px;
+  }
 }
 

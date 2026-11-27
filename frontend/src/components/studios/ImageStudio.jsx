@@ -41,10 +41,10 @@ export default function ImageStudio({ activeProject, language = 'en' }) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-studio-border pb-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-studio-border pb-4">
         <div>
           <h1 className="font-display text-2xl font-bold text-white flex items-center gap-2.5">
-            <Sparkles className="h-6 w-6 text-pink-400" />
+            <Sparkles className="h-6 w-6 text-green-400" />
             <span>{isTamil ? 'அனிம் பட ஸ்டுடியோ' : 'Anime Image Studio'}</span>
             <span className="rounded-md border border-studio-border bg-studio-card px-2 py-0.5 text-xs font-semibold text-pink-400">
               Phase 5 Architecture
@@ -178,7 +178,7 @@ export default function ImageStudio({ activeProject, language = 'en' }) {
           </div>
 
           <div className="rounded-2xl border border-dashed border-studio-border bg-studio-card/60 p-6 text-center space-y-2">
-            <Palette className="h-8 w-8 text-pink-400 mx-auto" />
+            <Palette className="h-8 w-8 text-green-400 mx-auto" />
             <h4 className="text-xs font-bold text-white">Live Canvas Render</h4>
             <p className="text-[11px] text-slate-400">
               Free-first SDXL and FLUX inference will render your generated character portraits and wallpapers directly here in Phase 5.

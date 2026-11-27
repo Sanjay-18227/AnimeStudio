@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   X,
   ShieldCheck,
@@ -34,13 +34,15 @@ import {
   deleteProjectMemory,
   clearProjectMemories
 } from '../../services/api';
+import LoadingIndicator from '../ui/LoadingIndicator';
 
 export default function SettingsModal({
   isOpen,
   onClose,
   systemHealth,
   language = 'en',
-  activeProject = null
+  activeProject = null,
+  onNotify
 }) {
   const isTamil = language === 'ta';
 
@@ -69,28 +71,70 @@ export default function SettingsModal({
     voice_speed: 1.0
   });
   const [settingsSaving, setSettingsSaving] = useState(false);
-  const [settingsStatus, setSettingsStatus] = useState(null);
 
   // Project Memory State
   const [memories, setMemories] = useState([]);
   const [loadingMemories, setLoadingMemories] = useState(false);
+  const [memoriesLoadError, setMemoriesLoadError] = useState('');
+  const memoryRequestIdRef = useRef(0);
   const [newMemoryKey, setNewMemoryKey] = useState('');
   const [newMemoryContent, setNewMemoryContent] = useState('');
   const [newMemoryCategory, setNewMemoryCategory] = useState('lore');
-  const [memoryActionStatus, setMemoryActionStatus] = useState(null);
 
   // Voice Test State
   const [isSpeakingTest, setIsSpeakingTest] = useState(false);
+  const dialogRef = useRef(null);
+  const closeButtonRef = useRef(null);
+  const previousFocusRef = useRef(null);
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    previousFocusRef.current = document.activeElement;
+    closeButtonRef.current?.focus();
+    return () => previousFocusRef.current?.focus?.();
+  }, [isOpen]);
+
+  const handleDialogKeyDown = (event) => {
+    if (event.key === 'Escape') {
+      event.stopPropagation();
+      onClose();
+      return;
+    }
+
+    if (event.key === 'Tab') {
+      const focusable = dialogRef.current?.querySelectorAll(
+        'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable || focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
       loadProviders();
       loadSettings();
-      if (activeProject && activeProject.id) {
+      if (activeProject?.id) {
         loadMemories(activeProject.id);
+      } else {
+        memoryRequestIdRef.current += 1;
+        setMemories([]);
+        setLoadingMemories(false);
+        setMemoriesLoadError('');
       }
+    } else {
+      memoryRequestIdRef.current += 1;
+      setLoadingMemories(false);
     }
-  }, [isOpen, activeProject]);
+  }, [isOpen, activeProject?.id]);
 
   const loadProviders = async () => {
     try {
@@ -105,6 +149,7 @@ export default function SettingsModal({
       }
     } catch (err) {
       console.error('Failed to load AI providers:', err);
+      onNotify?.('error', err.message || 'Could not load AI provider settings.');
     }
   };
 
@@ -116,18 +161,31 @@ export default function SettingsModal({
       }
     } catch (err) {
       console.error('Failed to load user settings:', err);
+      onNotify?.('error', err.message || 'Could not load your settings.');
     }
   };
 
   const loadMemories = async (projectId) => {
+    const requestId = ++memoryRequestIdRef.current;
+    setMemories([]);
     setLoadingMemories(true);
+    setMemoriesLoadError('');
     try {
       const data = await getProjectMemories(projectId);
-      setMemories(data || []);
+      if (requestId === memoryRequestIdRef.current) {
+        setMemories(data || []);
+      }
     } catch (err) {
-      console.error('Failed to load memories:', err);
+      if (requestId === memoryRequestIdRef.current) {
+        const message = err.message || (isTamil ? 'திட்ட நினைவுகளை ஏற்ற முடியவில்லை.' : 'Could not load project memories.');
+        console.error('Failed to load memories:', err);
+        setMemoriesLoadError(message);
+        onNotify?.('error', message);
+      }
     } finally {
-      setLoadingMemories(false);
+      if (requestId === memoryRequestIdRef.current) {
+        setLoadingMemories(false);
+      }
     }
   };
 
@@ -156,20 +214,12 @@ export default function SettingsModal({
 
   const handleSaveSettings = async () => {
     setSettingsSaving(true);
-    setSettingsStatus(null);
     try {
       const updated = await updateUserSettings(settings);
       setSettings(updated);
-      setSettingsStatus({
-        type: 'success',
-        message: isTamil ? 'விருப்பத்தேர்வுகள் சேமிக்கப்பட்டன!' : 'Preferences saved successfully!'
-      });
-      setTimeout(() => setSettingsStatus(null), 3000);
+      onNotify?.('success', isTamil ? 'விருப்பத்தேர்வுகள் சேமிக்கப்பட்டன!' : 'Preferences saved successfully.');
     } catch (err) {
-      setSettingsStatus({
-        type: 'error',
-        message: err.message || 'Failed to save settings'
-      });
+      onNotify?.('error', err.message || 'Could not save your settings.');
     } finally {
       setSettingsSaving(false);
     }
@@ -181,16 +231,9 @@ export default function SettingsModal({
       try {
         const reset = await resetUserSettings();
         setSettings(reset);
-        setSettingsStatus({
-          type: 'success',
-          message: isTamil ? 'இயல்புநிலைக்கு மீட்டமைக்கப்பட்டது!' : 'Settings restored to defaults!'
-        });
-        setTimeout(() => setSettingsStatus(null), 3000);
+        onNotify?.('success', isTamil ? 'இயல்புநிலைக்கு மீட்டமைக்கப்பட்டது!' : 'Settings restored to defaults.');
       } catch (err) {
-        setSettingsStatus({
-          type: 'error',
-          message: err.message || 'Failed to reset settings'
-        });
+        onNotify?.('error', err.message || 'Could not reset your settings.');
       } finally {
         setSettingsSaving(false);
       }
@@ -207,19 +250,13 @@ export default function SettingsModal({
         content: newMemoryContent.trim(),
         category: newMemoryCategory
       });
+      setMemoriesLoadError('');
       setMemories((prev) => [created, ...prev]);
       setNewMemoryKey('');
       setNewMemoryContent('');
-      setMemoryActionStatus({
-        type: 'success',
-        message: isTamil ? 'நினைவகம் சேர்க்கப்பட்டது!' : 'Memory added!'
-      });
-      setTimeout(() => setMemoryActionStatus(null), 2500);
+      onNotify?.('success', isTamil ? 'நினைவகம் சேர்க்கப்பட்டது!' : 'Memory added.');
     } catch (err) {
-      setMemoryActionStatus({
-        type: 'error',
-        message: err.message || 'Failed to add memory'
-      });
+      onNotify?.('error', err.message || 'Could not add that memory.');
     }
   };
 
@@ -228,8 +265,10 @@ export default function SettingsModal({
     try {
       await deleteProjectMemory(activeProject.id, memoryId);
       setMemories((prev) => prev.filter((m) => m.id !== memoryId));
+      onNotify?.('success', isTamil ? 'நினைவகம் நீக்கப்பட்டது' : 'Memory deleted.');
     } catch (err) {
       console.error('Failed to delete memory:', err);
+      onNotify?.('error', err.message || 'Could not delete that memory.');
     }
   };
 
@@ -238,9 +277,12 @@ export default function SettingsModal({
     if (window.confirm(isTamil ? 'இந்த திட்டத்திற்கான அனைத்து நினைவகங்களையும் நீக்கவா?' : 'Clear all lore memories for this project?')) {
       try {
         await clearProjectMemories(activeProject.id);
+        setMemoriesLoadError('');
         setMemories([]);
+        onNotify?.('success', isTamil ? 'அனைத்து நினைவகங்களும் நீக்கப்பட்டன' : 'Project memories cleared.');
       } catch (err) {
         console.error('Failed to clear memories:', err);
+        onNotify?.('error', err.message || 'Could not clear project memories.');
       }
     }
   };
@@ -276,8 +318,15 @@ export default function SettingsModal({
   const providers = providerData ? providerData.providers : [];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-150">
-      <div className="relative w-full max-w-3xl max-h-[90vh] flex flex-col rounded-2xl border border-studio-border bg-studio-card shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-2 backdrop-blur-sm animate-in fade-in duration-150 sm:p-4">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="settings-dialog-title"
+        onKeyDown={handleDialogKeyDown}
+        className="relative flex max-h-[94dvh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-studio-border bg-studio-card shadow-2xl"
+      >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-studio-border px-6 py-4 shrink-0 bg-[#0C0E1B]">
           <div className="flex items-center gap-3">
@@ -285,7 +334,7 @@ export default function SettingsModal({
               <Sliders className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-white leading-tight">
+              <h2 id="settings-dialog-title" className="text-base font-bold text-white leading-tight">
                 {isTamil ? 'அமைப்புகள் & AI தனிப்பயனாக்கம்' : 'Studio Settings & AI Customization'}
               </h2>
               <p className="text-xs text-slate-400">
@@ -296,15 +345,18 @@ export default function SettingsModal({
             </div>
           </div>
           <button
+            type="button"
+            ref={closeButtonRef}
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-studio-hover hover:text-white transition-colors"
+            className="rounded-lg p-1.5 text-slate-400 hover:bg-studio-hover hover:text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-studio-purple"
+            aria-label={isTamil ? 'சாளரத்தை மூடு' : 'Close settings dialog'}
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-studio-border bg-studio-elevated/40 px-6 gap-2 shrink-0 overflow-x-auto">
+        <div className="flex flex-col border-b border-studio-border bg-studio-elevated/40 px-4 gap-1 shrink-0 sm:flex-row sm:px-6 sm:gap-2 sm:overflow-x-auto">
           <button
             onClick={() => setActiveTab('providers')}
             className={`flex items-center gap-2 py-3 px-3 text-xs font-semibold border-b-2 transition-colors whitespace-nowrap ${
@@ -516,26 +568,15 @@ export default function SettingsModal({
           {/* ======================================================== */}
           {activeTab === 'personality' && (
             <div className="space-y-4">
-              {settingsStatus && (
-                <div
-                  className={`rounded-xl border p-3 text-xs font-semibold flex items-center justify-between ${
-                    settingsStatus.type === 'success'
-                      ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300'
-                      : 'border-rose-500/40 bg-rose-500/10 text-rose-300'
-                  }`}
-                >
-                  <span>{settingsStatus.message}</span>
-                </div>
-              )}
-
               <div className="rounded-xl border border-studio-border bg-studio-elevated/70 p-4 space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Assistant Name */}
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    <label htmlFor="assistant-name" className="block text-xs font-semibold text-slate-300 mb-1">
                       Assistant Display Name
                     </label>
                     <input
+                      id="assistant-name"
                       type="text"
                       value={settings.assistant_name}
                       onChange={(e) => setSettings({ ...settings, assistant_name: e.target.value })}
@@ -546,10 +587,11 @@ export default function SettingsModal({
 
                   {/* Personality Preset */}
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    <label htmlFor="assistant-personality" className="block text-xs font-semibold text-slate-300 mb-1">
                       Personality Type
                     </label>
                     <select
+                      id="assistant-personality"
                       value={settings.personality}
                       onChange={(e) => setSettings({ ...settings, personality: e.target.value })}
                       className="w-full rounded-lg border border-studio-border bg-studio-card px-3 py-2 text-xs text-white focus:border-studio-purple focus:outline-none"
@@ -564,10 +606,11 @@ export default function SettingsModal({
 
                   {/* Response Tone */}
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    <label htmlFor="assistant-tone" className="block text-xs font-semibold text-slate-300 mb-1">
                       Response Tone
                     </label>
                     <input
+                      id="assistant-tone"
                       type="text"
                       value={settings.response_tone}
                       onChange={(e) => setSettings({ ...settings, response_tone: e.target.value })}
@@ -578,10 +621,11 @@ export default function SettingsModal({
 
                   {/* Response Length */}
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    <label htmlFor="assistant-response-length" className="block text-xs font-semibold text-slate-300 mb-1">
                       Response Length
                     </label>
                     <select
+                      id="assistant-response-length"
                       value={settings.response_length}
                       onChange={(e) => setSettings({ ...settings, response_length: e.target.value })}
                       className="w-full rounded-lg border border-studio-border bg-studio-card px-3 py-2 text-xs text-white focus:border-studio-purple focus:outline-none"
@@ -594,10 +638,11 @@ export default function SettingsModal({
 
                   {/* Language */}
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    <label htmlFor="assistant-language" className="block text-xs font-semibold text-slate-300 mb-1">
                       Primary Language
                     </label>
                     <select
+                      id="assistant-language"
                       value={settings.language}
                       onChange={(e) => setSettings({ ...settings, language: e.target.value })}
                       className="w-full rounded-lg border border-studio-border bg-studio-card px-3 py-2 text-xs text-white focus:border-studio-purple focus:outline-none"
@@ -610,10 +655,11 @@ export default function SettingsModal({
 
                   {/* Creativity Level */}
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    <label htmlFor="assistant-creativity" className="block text-xs font-semibold text-slate-300 mb-1">
                       Creativity Level (Temperature)
                     </label>
                     <select
+                      id="assistant-creativity"
                       value={settings.creativity_level}
                       onChange={(e) => setSettings({ ...settings, creativity_level: e.target.value })}
                       className="w-full rounded-lg border border-studio-border bg-studio-card px-3 py-2 text-xs text-white focus:border-studio-purple focus:outline-none"
@@ -626,10 +672,11 @@ export default function SettingsModal({
 
                   {/* Default Assistant Role */}
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    <label htmlFor="assistant-role" className="block text-xs font-semibold text-slate-300 mb-1">
                       Default Assistant Role
                     </label>
                     <select
+                      id="assistant-role"
                       value={settings.default_role}
                       onChange={(e) => setSettings({ ...settings, default_role: e.target.value })}
                       className="w-full rounded-lg border border-studio-border bg-studio-card px-3 py-2 text-xs text-white focus:border-studio-purple focus:outline-none"
@@ -644,10 +691,11 @@ export default function SettingsModal({
 
                   {/* Theme */}
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    <label htmlFor="workspace-theme" className="block text-xs font-semibold text-slate-300 mb-1">
                       Workspace Theme
                     </label>
                     <select
+                      id="workspace-theme"
                       value={settings.theme}
                       onChange={(e) => setSettings({ ...settings, theme: e.target.value })}
                       className="w-full rounded-lg border border-studio-border bg-studio-card px-3 py-2 text-xs text-white focus:border-studio-purple focus:outline-none"
@@ -736,6 +784,7 @@ export default function SettingsModal({
 
                   {memories.length > 0 && (
                     <button
+                      type="button"
                       onClick={handleClearMemories}
                       className="flex items-center gap-1 text-[11px] font-semibold text-rose-400 hover:text-rose-300"
                     >
@@ -750,18 +799,6 @@ export default function SettingsModal({
                 </p>
               </div>
 
-              {memoryActionStatus && (
-                <div
-                  className={`rounded-xl border p-2.5 text-xs font-semibold flex items-center justify-between ${
-                    memoryActionStatus.type === 'success'
-                      ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300'
-                      : 'border-rose-500/40 bg-rose-500/10 text-rose-300'
-                  }`}
-                >
-                  <span>{memoryActionStatus.message}</span>
-                </div>
-              )}
-
               {/* Add New Memory Form */}
               {activeProject ? (
                 <form
@@ -774,7 +811,9 @@ export default function SettingsModal({
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                     <div>
+                      <label htmlFor="memory-key" className="sr-only">Memory key</label>
                       <input
+                        id="memory-key"
                         type="text"
                         placeholder="Key (e.g. dragon_sword)"
                         value={newMemoryKey}
@@ -784,7 +823,9 @@ export default function SettingsModal({
                     </div>
 
                     <div>
+                      <label htmlFor="memory-category" className="sr-only">Memory category</label>
                       <select
+                        id="memory-category"
                         value={newMemoryCategory}
                         onChange={(e) => setNewMemoryCategory(e.target.value)}
                         className="w-full rounded-lg border border-studio-border bg-studio-elevated px-3 py-1.5 text-xs text-white focus:border-studio-purple focus:outline-none"
@@ -809,7 +850,9 @@ export default function SettingsModal({
                   </div>
 
                   <div>
+                    <label htmlFor="memory-content" className="sr-only">Memory content</label>
                     <textarea
+                      id="memory-content"
                       rows={2}
                       placeholder="Content (e.g. The sacred Dragon Katana emits violet flames and cannot harm innocent beings.)"
                       value={newMemoryContent}
@@ -827,7 +870,18 @@ export default function SettingsModal({
               {/* Memory List */}
               <div className="space-y-2">
                 {loadingMemories ? (
-                  <div className="p-4 text-center text-xs text-slate-400">Loading project memories...</div>
+                  <LoadingIndicator label="Loading project memories..." />
+                ) : memoriesLoadError ? (
+                  <div role="alert" className="rounded-xl border border-red-500/30 bg-red-500/5 p-4 text-center text-xs text-red-200">
+                    <p>{memoriesLoadError}</p>
+                    <button
+                      type="button"
+                      onClick={() => activeProject?.id && loadMemories(activeProject.id)}
+                      className="mt-3 rounded-lg border border-red-400/30 px-3 py-1.5 hover:bg-red-500/10"
+                    >
+                      {isTamil ? 'மீண்டும் முயற்சி செய்' : 'Try again'}
+                    </button>
+                  </div>
                 ) : memories.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-studio-border p-6 text-center text-xs text-slate-500">
                     No memories saved yet for this project. Add one above to lock persistent facts!
