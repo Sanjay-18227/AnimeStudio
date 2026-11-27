@@ -4,16 +4,19 @@ import { AlertCircle, CheckCircle2, Info, X } from 'lucide-react';
 const toastStyles = {
   success: {
     icon: CheckCircle2,
+    iconColor: 'text-emerald-400',
     classes: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200',
     role: 'status'
   },
   error: {
     icon: AlertCircle,
+    iconColor: 'text-red-400',
     classes: 'border-rose-500/40 bg-rose-500/10 text-rose-200',
     role: 'alert'
   },
   info: {
     icon: Info,
+    iconColor: 'text-yellow-400',
     classes: 'border-studio-cyan/40 bg-studio-cyan/10 text-cyan-100',
     role: 'status'
   }
@@ -37,7 +40,7 @@ export default function Toast({ toast, onDismiss, duration = 4500 }) {
       role={style.role}
       aria-live={style.role === 'alert' ? 'assertive' : 'polite'}
     >
-      <Icon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+      <Icon className={`mt-0.5 h-4 w-4 shrink-0 ${style.iconColor}`} aria-hidden="true" />
       <p className="min-w-0 flex-1 whitespace-pre-line text-sm">{toast.message}</p>
       <button
         type="button"

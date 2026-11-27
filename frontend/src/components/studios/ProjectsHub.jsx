@@ -43,7 +43,7 @@ export default function ProjectsHub({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="font-display text-2xl font-bold text-white flex items-center gap-2.5">
-            <FolderGit2 className="h-6 w-6 text-studio-purple-light" />
+            <FolderGit2 className="h-6 w-6 text-slate-300" />
             <span>{isTamil ? 'என் திட்டங்கள்' : 'My Creative Projects'}</span>
           </h1>
           <p className="text-xs text-slate-400 mt-1">

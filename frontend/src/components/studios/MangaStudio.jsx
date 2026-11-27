@@ -484,7 +484,7 @@ export default function MangaStudio({ activeProject, language = 'en', onNotify }
         <div>
           <div className="flex items-center gap-2">
             <h1 className="font-display text-2xl font-bold text-white flex items-center gap-2.5">
-              <BookOpen className="h-6 w-6 text-studio-cyan" />
+              <BookOpen className="h-6 w-6 text-orange-400" />
               <span>{isTamil ? 'மங்கா ஸ்டுடியோ' : 'Manga Studio'}</span>
               <span className="rounded-md border border-studio-cyan/30 bg-studio-cyan/10 px-2 py-0.5 text-xs font-bold text-studio-cyan">
                 Phase 3 Engine

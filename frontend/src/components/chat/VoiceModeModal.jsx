@@ -258,7 +258,7 @@ export default function VoiceModeModal({
         <div className="relative z-10 flex items-center justify-between border-b border-studio-border/60 pb-3 shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-studio-purple to-studio-cyan text-white shadow-glow-purple">
-              <Radio className="h-5 w-5 animate-pulse" />
+              <Radio className="h-5 w-5 text-violet-400 animate-pulse" />
             </div>
             <div>
               <h3 className="font-display font-bold text-base text-white flex items-center gap-2">
@@ -308,20 +308,20 @@ export default function VoiceModeModal({
             {/* Central Microphone / Speaker Hub */}
             <button
               onClick={isListening ? stopListening : startListening}
-              className={`relative z-10 flex h-20 w-20 items-center justify-center rounded-full transition-all duration-300 shadow-xl ${
+              className={`relative z-10 flex h-20 w-20 items-center justify-center rounded-full border border-studio-border transition-all duration-300 shadow-xl ${
                 isListening
                   ? 'bg-studio-cyan text-black shadow-glow-cyan scale-105'
                   : isSpeaking
                   ? 'bg-studio-purple text-white shadow-glow-purple'
-                  : 'bg-studio-elevated text-slate-300 hover:text-white hover:bg-studio-hover border border-studio-border'
+                  : 'bg-studio-elevated text-slate-300 hover:text-white hover:bg-studio-hover'
               }`}
             >
               {isListening ? (
-                <Mic className="h-8 w-8 animate-pulse" />
+                <Mic className="h-8 w-8 text-cyan-400 animate-pulse" />
               ) : isSpeaking ? (
-                <Volume2 className="h-8 w-8 animate-bounce" />
+                <Volume2 className="h-8 w-8 text-violet-400 animate-bounce" />
               ) : (
-                <Mic className="h-8 w-8" />
+                <Mic className="h-8 w-8 text-violet-400" />
               )}
             </button>
           </div>
@@ -347,12 +347,8 @@ export default function VoiceModeModal({
             {[40, 70, 90, 60, 100, 50, 80, 45, 95, 65, 30].map((height, i) => (
               <span
                 key={i}
-                className={`w-1 rounded-full transition-all duration-150 ${
-                  isListening
-                    ? 'bg-studio-cyan'
-                    : isSpeaking
-                    ? 'bg-studio-purple'
-                    : 'bg-slate-700/50'
+                className={`mono-visual w-1 rounded-full transition-all duration-150 ${
+                  isListening || isSpeaking ? 'opacity-100' : 'opacity-50'
                 }`}
                 style={{
                   height: isListening || isSpeaking ? `${height}%` : '20%',

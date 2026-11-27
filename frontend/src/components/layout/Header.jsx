@@ -25,7 +25,7 @@ export default function Header({
   isMobileSidebarOpen = false
 }) {
   return (
-    <header className="sticky top-0 z-10 flex min-h-16 w-full flex-wrap items-center justify-between gap-2 border-b border-studio-border bg-[#0C0E1B]/90 px-3 py-2 backdrop-blur-md sm:flex-nowrap sm:px-6">
+    <header className="sticky top-0 z-10 flex min-h-16 w-full flex-wrap items-center justify-between gap-2 border-b border-studio-border bg-black px-3 py-2 backdrop-blur-md sm:flex-nowrap sm:px-6">
       {/* Left: Active Project Selector */}
       <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-4">
         <button
@@ -41,7 +41,7 @@ export default function Header({
             : <Menu className="h-4 w-4" aria-hidden="true" />}
         </button>
         <div className="hidden items-center gap-2 sm:flex">
-          <FolderOpen className="h-4 w-4 text-studio-purple-light" aria-hidden="true" />
+          <FolderOpen className="h-4 w-4 text-slate-300" aria-hidden="true" />
           <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
             Active Project:
           </span>
@@ -70,7 +70,7 @@ export default function Header({
         <button
           type="button"
           onClick={onOpenNewProjectModal}
-          className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-studio-purple/30 bg-studio-purple/10 px-2.5 text-xs font-medium text-studio-purple-light shadow-sm transition-all hover:bg-studio-purple hover:text-white"
+          className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-studio-border bg-black px-2.5 text-xs font-medium text-white transition-colors hover:bg-studio-hover hover:text-white"
           aria-label="Create a new project"
         >
           <FolderPlus className="h-4 w-4" aria-hidden="true" />
@@ -89,17 +89,17 @@ export default function Header({
           aria-label="Open AI provider settings"
         >
           <div className="flex items-center gap-1.5">
-            <Sparkles className="h-3.5 w-3.5 text-studio-purple-light" />
+            <Sparkles className="h-3.5 w-3.5 text-violet-400" />
             <span className="text-slate-300 font-medium">Free AI Suite:</span>
           </div>
           {systemHealth ? (
             <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-400">
-              <CheckCircle2 className="h-3 w-3" />
+              <CheckCircle2 className="h-3 w-3 text-emerald-400" />
               Online
             </span>
           ) : (
             <span className="flex items-center gap-1 text-[11px] font-semibold text-amber-400">
-              <AlertTriangle className="h-3 w-3" />
+              <AlertTriangle className="h-3 w-3 text-amber-400" />
               Local Mock
             </span>
           )}

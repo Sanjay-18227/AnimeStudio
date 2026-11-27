@@ -30,6 +30,7 @@ export default function Sidebar({
       id: 'dashboard',
       label: 'Studio Dashboard',
       icon: LayoutDashboard,
+      iconColor: 'text-cyan-400',
       badge: 'Hub',
       badgeColor: 'bg-studio-purple/20 text-studio-purple-light border-studio-purple/30',
     },
@@ -37,6 +38,7 @@ export default function Sidebar({
       id: 'chat',
       label: 'AI Chat Studio',
       icon: MessageSquareCode,
+      iconColor: 'text-violet-400',
       badge: 'EN / தமிழ்',
       badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
     },
@@ -44,6 +46,7 @@ export default function Sidebar({
       id: 'manga',
       label: 'Manga Studio',
       icon: BookOpen,
+      iconColor: 'text-orange-400',
       badge: 'Pages',
       badgeColor: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
     },
@@ -51,6 +54,7 @@ export default function Sidebar({
       id: 'character',
       label: 'Character Studio',
       icon: UserSquare2,
+      iconColor: 'text-pink-400',
       badge: 'Profiles',
       badgeColor: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
     },
@@ -58,6 +62,7 @@ export default function Sidebar({
       id: 'image',
       label: 'Anime Image Studio',
       icon: Sparkles,
+      iconColor: 'text-green-400',
       badge: 'SDXL / FLUX',
       badgeColor: 'bg-pink-500/20 text-pink-300 border-pink-500/30',
     },
@@ -65,6 +70,7 @@ export default function Sidebar({
       id: 'photo_to_anime',
       label: 'Photo-to-Anime',
       icon: Camera,
+      iconColor: 'text-blue-400',
       badge: 'Img2Img',
       badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
     },
@@ -72,6 +78,7 @@ export default function Sidebar({
       id: 'video',
       label: 'Anime Video Studio',
       icon: Film,
+      iconColor: 'text-amber-400',
       badge: 'Timeline',
       badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
     },
@@ -79,6 +86,7 @@ export default function Sidebar({
       id: 'projects',
       label: 'My Projects',
       icon: FolderGit2,
+      iconColor: 'text-slate-300',
       badge: projectCount > 0 ? String(projectCount) : '0',
       badgeColor: 'bg-slate-700/60 text-slate-300 border-slate-600/40',
     },
@@ -97,7 +105,7 @@ export default function Sidebar({
       <aside
         id="studio-sidebar"
         aria-label="Main navigation"
-        className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-studio-border bg-[#0C0E1B] transition-transform duration-300 ease-in-out select-none md:relative md:z-20 md:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-studio-border bg-black transition-transform duration-300 ease-in-out select-none md:relative md:z-20 md:translate-x-0 ${
           isMobileOpen ? 'translate-x-0' : '-translate-x-full'
         } ${isCollapsed ? 'md:w-20' : 'md:w-64'}`}
       >
@@ -105,12 +113,12 @@ export default function Sidebar({
       <div className="flex h-16 items-center justify-between border-b border-studio-border px-4">
         {!isCollapsed && (
           <div className="flex items-center gap-2.5 overflow-hidden">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-studio-purple via-indigo-600 to-studio-cyan shadow-glow-purple">
-              <Flame className="h-5 w-5 text-white animate-pulse" />
+            <div className="flex h-9 w-9 items-center justify-center">
+              <Flame className="h-5 w-5 text-violet-400" />
             </div>
             <div className="flex flex-col">
               <span className="font-display font-extrabold tracking-wide text-white text-base leading-tight">
-                ANIME<span className="text-transparent bg-clip-text bg-gradient-to-r from-studio-purple-light to-studio-cyan">STUDIO</span>
+                ANIMESTUDIO
               </span>
               <span className="text-[10px] tracking-widest text-slate-400 uppercase font-semibold">
                 AI Production OS
@@ -120,8 +128,8 @@ export default function Sidebar({
         )}
 
         {isCollapsed && (
-          <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-studio-purple to-studio-cyan shadow-glow-purple">
-            <Flame className="h-5 w-5 text-white" />
+          <div className="mx-auto flex h-9 w-9 items-center justify-center">
+            <Flame className="h-5 w-5 text-violet-400" />
           </div>
         )}
 
@@ -165,22 +173,16 @@ export default function Sidebar({
               key={item.id}
               type="button"
               onClick={() => setActiveView(item.id)}
-              className={`group relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
+              className={`group relative flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-sm font-medium transition-all ${
                 isActive
-                  ? 'bg-gradient-to-r from-studio-purple/20 to-indigo-950/40 text-white border border-studio-purple/40 shadow-glow-purple'
+                  ? 'bg-black text-white border-studio-border'
                   : 'text-slate-400 hover:bg-studio-card hover:text-slate-200 border border-transparent'
               }`}
               title={isCollapsed ? item.label : undefined}
               aria-current={isActive ? 'page' : undefined}
             >
-              <div
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors ${
-                  isActive
-                    ? 'bg-studio-purple text-white shadow-sm'
-                    : 'bg-studio-card text-slate-400 group-hover:text-studio-purple-light group-hover:bg-studio-hover'
-                }`}
-              >
-                <Icon className="h-4 w-4" />
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center">
+                <Icon className={`h-4 w-4 ${item.iconColor}`} />
               </div>
 
               {!isCollapsed && (
@@ -214,7 +216,7 @@ export default function Sidebar({
           aria-current={activeView === 'settings' ? 'page' : undefined}
         >
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-studio-card text-slate-400">
-            <Settings className="h-4 w-4" />
+            <Settings className="h-4 w-4 text-violet-400" />
           </div>
           {!isCollapsed && <span className="truncate">Settings & Providers</span>}
         </button>
@@ -222,10 +224,7 @@ export default function Sidebar({
         {!isCollapsed ? (
           <div className="flex items-center justify-between rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-3 py-2">
             <div className="flex items-center gap-2">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-              </span>
+              <span className="inline-flex h-2 w-2 rounded-full mono-visual"></span>
               <span className="text-[11px] font-semibold text-emerald-400">Free-First Active</span>
             </div>
             <ShieldCheck className="h-4 w-4 text-emerald-400" />

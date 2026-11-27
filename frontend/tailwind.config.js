@@ -9,11 +9,11 @@ export default {
     extend: {
       colors: {
         studio: {
-          bg: '#0A0C16',         // Deep obsidian anime night
-          card: '#121526',       // Frosted card surface
-          elevated: '#1A1E36',   // Raised panel
-          border: '#2A3056',     // Subtle cyber border
-          hover: '#242A4A',      // Hover state
+          bg: '#000000',
+          card: '#000000',
+          elevated: '#000000',
+          border: '#222222',
+          hover: '#111111',
           purple: {
             light: '#C084FC',
             DEFAULT: '#8B5CF6',
@@ -37,9 +37,9 @@ export default {
         display: ['Cabinet Grotesk', 'Plus Jakarta Sans', 'sans-serif'],
       },
       boxShadow: {
-        'glow-purple': '0 0 25px -5px rgba(139, 92, 246, 0.35)',
-        'glow-cyan': '0 0 25px -5px rgba(6, 182, 212, 0.35)',
-        'glow-pink': '0 0 25px -5px rgba(236, 72, 153, 0.35)',
+        'glow-purple': 'none',
+        'glow-cyan': 'none',
+        'glow-pink': 'none',
       }
     },
   },

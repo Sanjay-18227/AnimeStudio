@@ -38,7 +38,7 @@ export default function DashboardHome({
         ? 'கதைக் கரு, வசனங்கள், உலக உருவாக்கம் மற்றும் தூண்டுதல்களை தமிழ் மற்றும் ஆங்கிலத்தில் உருவாக்குங்கள்.'
         : 'Collaborate with an anime co-pilot for story plots, character dialogues, and optimized visual prompts in English & Tamil.',
       icon: MessageSquareCode,
-      color: 'from-purple-600 to-indigo-600',
+      iconColor: 'text-violet-400',
       badge: isTamil ? 'இருமொழி' : 'Bilingual',
     },
     {
@@ -49,7 +49,7 @@ export default function DashboardHome({
         ? 'முழு அத்தியாயங்கள், காட்சிகள், பேனல் விளக்கங்கள் மற்றும் காமிக் பக்க அமைப்புகளை உருவாக்குங்கள்.'
         : 'Generate full manga arcs, breakdown chapters into scenes, author dialogues, and generate comic page layouts.',
       icon: BookOpen,
-      color: 'from-blue-600 to-cyan-600',
+      iconColor: 'text-orange-400',
       badge: 'Phase 3',
     },
     {
@@ -60,7 +60,7 @@ export default function DashboardHome({
         ? 'தோற்றம், சிகை அலங்காரம், உடைகள் மற்றும் திறன்களுடன் நிலையான கதாபாத்திரங்களை வடிவமைக்கவும்.'
         : 'Craft detailed character dossiers (hair, attire, backstory, powers) and maintain prompt consistency across scenes.',
       icon: UserSquare2,
-      color: 'from-fuchsia-600 to-pink-600',
+      iconColor: 'text-pink-400',
       badge: 'Phase 4',
     },
     {
@@ -71,7 +71,7 @@ export default function DashboardHome({
         ? 'SDXL மற்றும் Animagine மாதிரிகள் மூலம் உயர்தர அனிம் கலைப்படைப்புகள், வால்பேப்பர்கள் மற்றும் விளக்கப்படங்கள்.'
         : 'Generate breathtaking anime concept art, portraits, action sequences, and screentones with free models.',
       icon: Sparkles,
-      color: 'from-pink-600 to-rose-600',
+      iconColor: 'text-green-400',
       badge: 'Phase 5',
     },
     {
@@ -82,7 +82,7 @@ export default function DashboardHome({
         ? 'உண்மையான புகைப்படங்களை கிளாசிக் ஜப்பானிய அனிம் கலை பாணிகளாக மாற்றவும்.'
         : 'Transform real-world portraits, landscapes, and scenes into vibrant Japanese anime aesthetic illustrations.',
       icon: Camera,
-      color: 'from-amber-600 to-orange-600',
+      iconColor: 'text-blue-400',
       badge: 'Phase 6',
     },
     {
@@ -93,7 +93,7 @@ export default function DashboardHome({
         ? 'காட்சிகளை அனிமேட் செய்து, கேமரா நகர்வுகள், இலவச நரம்பியல் குரல்கள் மற்றும் வசனங்களுடன் வீடியோவை ஏற்றுமதி செய்யவும்.'
         : 'Sequence scenes, add dynamic camera pans/zooms, attach neural voiceovers (EN/Tamil), and export MP4 with FFmpeg.',
       icon: Film,
-      color: 'from-cyan-600 to-teal-600',
+      iconColor: 'text-amber-400',
       badge: 'Phase 8',
     },
   ];
@@ -333,8 +333,8 @@ export default function DashboardHome({
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <div className={`flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${studio.color} text-white shadow-md`}>
-                      <Icon className="h-5 w-5" />
+                    <div className="flex h-11 w-11 items-center justify-center">
+                      <Icon className={`h-5 w-5 ${studio.iconColor}`} />
                     </div>
                     <span className="rounded-md border border-studio-border bg-studio-elevated px-2 py-0.5 text-[10px] font-semibold text-slate-300">
                       {studio.badge}
@@ -383,18 +383,18 @@ export default function DashboardHome({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           {[
-            { step: '01', title: 'Story Brainstorm', desc: 'AI Chat Studio in English & Tamil', icon: MessageSquareCode },
-            { step: '02', title: 'Character Design', desc: 'Consistent visual trait dossiers', icon: UserSquare2 },
-            { step: '03', title: 'Manga Script & Pages', desc: 'Chapters, scene splits & panel layouts', icon: BookOpen },
-            { step: '04', title: 'Anime Art Synthesis', desc: 'SDXL / FLUX text & photo-to-anime', icon: Sparkles },
-            { step: '05', title: 'Video & Voiceover', desc: 'Timeline composition & FFmpeg MP4', icon: Film },
+            { step: '01', title: 'Story Brainstorm', desc: 'AI Chat Studio in English & Tamil', icon: MessageSquareCode, iconColor: 'text-violet-400' },
+            { step: '02', title: 'Character Design', desc: 'Consistent visual trait dossiers', icon: UserSquare2, iconColor: 'text-pink-400' },
+            { step: '03', title: 'Manga Script & Pages', desc: 'Chapters, scene splits & panel layouts', icon: BookOpen, iconColor: 'text-orange-400' },
+            { step: '04', title: 'Anime Art Synthesis', desc: 'SDXL / FLUX text & photo-to-anime', icon: Sparkles, iconColor: 'text-green-400' },
+            { step: '05', title: 'Video & Voiceover', desc: 'Timeline composition & FFmpeg MP4', icon: Film, iconColor: 'text-amber-400' },
           ].map((item, idx) => {
             const StepIcon = item.icon;
             return (
               <div key={idx} className="relative rounded-lg border border-studio-border bg-studio-elevated/40 p-3.5">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[10px] font-extrabold text-studio-purple-light">{item.step}</span>
-                  <StepIcon className="h-4 w-4 text-slate-400" />
+                  <StepIcon className={`h-4 w-4 ${item.iconColor}`} />
                 </div>
                 <div className="font-semibold text-xs text-white">{item.title}</div>
                 <div className="text-[11px] text-slate-400 mt-1">{item.desc}</div>
